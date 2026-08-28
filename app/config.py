@@ -56,7 +56,7 @@ class Settings(BaseSettings):
     # ML attack detector configuration
     # Supported backends: zl | rule | mock.
     ml_attack_detector_backend: str = "zl"
-    zl_model_root: str = "../ZL"
+    zl_model_root: str = "ml"
     zl_model_version: str = "V2"
     zl_model_path: str = ""
     zl_model_manifest_path: str = "metadata/manifests/v2_compact_tree_manifest.json"

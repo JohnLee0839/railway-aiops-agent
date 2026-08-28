@@ -1,0 +1,14 @@
+experiment_name: v2_shap_explainability
+reference_model_manifest: metadata/manifests/v2_compact_tree_manifest.json
+
+explainability:
+  sample_per_class: 500
+  local_examples_per_class: 1
+  check_additivity: false
+
+iteration_notes:
+  parent_experiment: v2_compact_top3_hist_gradient_boosting
+  motivation:
+    - Quantify global feature contributions with SHAP on the compact V2 model.
+    - Preserve representative local explanations for one validation example per class.
+    - Confirm that the compressed V2 model still behaves consistently with the V1 diagnostic findings.

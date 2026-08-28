@@ -1,0 +1,54 @@
+{
+  "generated_at": "2026-07-27T11:44:46.714422+00:00",
+  "report_path": "E:\\ZL\\STSRS\\reports\\model_training\\v2_explainability_report.md",
+  "result": {
+    "experiment_name": "v2_shap_explainability",
+    "model_name": "v2_compact_top3_hist_gradient_boosting",
+    "model_path": "E:\\ZL\\STSRS\\models\\baseline\\v2_compact_top3_hist_gradient_boosting.pkl",
+    "config_path": "E:\\ZL\\STSRS\\configs\\modeling\\v2_explainability.yaml",
+    "reference_model_manifest_path": "E:\\ZL\\STSRS\\metadata\\manifests\\v2_compact_tree_manifest.json",
+    "validation_sample_rows": 2000,
+    "sample_per_class": 500,
+    "local_examples_per_class": 1,
+    "global_importance_path": "E:\\ZL\\STSRS\\reports\\model_training\\v2_shap_global_importance.csv",
+    "per_class_importance_path": "E:\\ZL\\STSRS\\reports\\model_training\\v2_shap_per_class_importance.csv",
+    "base_value_path": "E:\\ZL\\STSRS\\reports\\model_training\\v2_shap_base_values.csv",
+    "local_contribution_path": "E:\\ZL\\STSRS\\reports\\model_training\\v2_shap_local_contributions.csv",
+    "top_global_features": [
+      {
+        "feature_name": "Distance",
+        "mean_abs_shap": 3.3834045882056665
+      },
+      {
+        "feature_name": "PacketLoss",
+        "mean_abs_shap": 2.056317970882918
+      },
+      {
+        "feature_name": "Latency",
+        "mean_abs_shap": 0.2979451608460451
+      }
+    ],
+    "base_values": [
+      {
+        "class_label": "Normal",
+        "class_id": 0,
+        "base_value": -2.4305646367417317
+      },
+      {
+        "class_label": "DoS",
+        "class_id": 1,
+        "base_value": -3.619171671603895
+      },
+      {
+        "class_label": "Jamming",
+        "class_id": 2,
+        "base_value": -3.857168329154771
+      },
+      {
+        "class_label": "ReplayAttack",
+        "class_id": 3,
+        "base_value": -3.770567350801452
+      }
+    ]
+  }
+}

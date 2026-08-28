@@ -1,0 +1,25 @@
+model_name: sgd_logistic_baseline
+version: 1
+
+training:
+  batch_size: 100000
+  epochs: 1
+  random_seed: 42
+
+scaler:
+  enabled: true
+  with_mean: true
+  with_std: true
+
+classifier:
+  family: SGDClassifier
+  loss: log_loss
+  penalty: l2
+  alpha: 0.0001
+  learning_rate: optimal
+  eta0: 0.01
+  class_weight: balanced
+
+evaluation:
+  primary_metric: validation_macro_f1
+  emit_confusion_matrix: true

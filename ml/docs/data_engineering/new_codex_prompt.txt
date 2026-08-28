@@ -1,0 +1,26 @@
+Continue the STSRS data-engineering work in this repository.
+
+Current completed stage:
+raw txt -> schema validation -> staging parquet -> schema report
+
+Already generated:
+- data/staging/control_center.parquet
+- data/staging/train.parquet
+- reports/data_validation/schema_report.md
+- metadata/manifests/schema_validation_manifest.json
+
+The next required task is Stage 3: Key Audit.
+
+Please use the existing project code/config structure and implement key validation on the staging Parquet files.
+
+Validate whether the candidate key (Timestamp, TrainID, SignalID) is truly unique in each dataset.
+
+Produce:
+- key_audit_report
+- key_audit_manifest
+- null key statistics
+- duplicate key statistics
+- distinct key counts
+- duplicate/null sample outputs
+
+Do not start merge or model training yet.

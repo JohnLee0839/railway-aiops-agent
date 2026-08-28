@@ -1,0 +1,39 @@
+quality_thresholds_version: 1
+
+schema_validation:
+  column_count_must_match: true
+  column_order_must_match: true
+  timestamp_parse_success_rate_min: 1.0
+  numeric_parse_success_rate_min: 1.0
+
+key_validation:
+  null_key_rows_max: 0
+  duplicate_key_rows_max: 0
+
+alignment_validation:
+  trusted_key_requires_left_count: 1
+  trusted_key_requires_right_count: 1
+  left_only_ratio_warn_max: 0.001
+  right_only_ratio_warn_max: 0.001
+  ambiguous_ratio_warn_max: 0.001
+
+field_consistency:
+  default_match_rate_min: 0.9999
+  numeric_comparison:
+    absolute_tolerance: 1.0e-09
+    relative_tolerance: 1.0e-09
+  excluded_from_equality_check:
+    - RenewalInterval
+
+label_quality:
+  unknown_label_ratio_max: 0.0
+
+feature_quality:
+  target_column_required: true
+  feature_manifest_required: true
+  null_feature_ratio_warn_max: 0.0
+
+release_gates:
+  allow_merge_when_alignment_fails: false
+  allow_training_when_unknown_labels_exist: false
+  allow_training_when_conflict_rows_exist: false

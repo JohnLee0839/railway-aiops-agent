@@ -1,0 +1,28 @@
+label_mapping_version: 1
+
+source_column: AttackInfo
+target_column: AttackLabel
+raw_backup_column: AttackInfo_raw
+
+normalization:
+  trim_whitespace: true
+  collapse_internal_spaces: true
+  case_policy: preserve
+  delimiter: "/"
+
+mappings:
+  "Normal/nan/Normal": Normal
+  "Attack/DoS/DoS": DoS
+  "Attack/Jamming/Jamming": Jamming
+  "Suspicious/Replay Attack/Replay Attack": ReplayAttack
+
+allowed_targets:
+  - Normal
+  - DoS
+  - Jamming
+  - ReplayAttack
+
+unknown_label_policy:
+  action: quarantine
+  emit_report: true
+  report_name: unknown_label_report

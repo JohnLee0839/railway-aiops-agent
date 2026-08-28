@@ -1,0 +1,116 @@
+{
+  "generated_at": "2026-07-27T09:02:25.541740+00:00",
+  "report_path": "E:\\ZL\\STSRS\\reports\\data_validation\\field_consistency_report.md",
+  "sample_limit": 100,
+  "numeric_tolerance": {
+    "absolute_tolerance": 1e-09,
+    "relative_tolerance": 1e-09
+  },
+  "result": {
+    "left_dataset_name": "control_center",
+    "right_dataset_name": "train",
+    "left_staging_path": "E:\\ZL\\STSRS\\data\\staging\\control_center.parquet",
+    "right_staging_path": "E:\\ZL\\STSRS\\data\\staging\\train.parquet",
+    "trusted_keys_path": "E:\\ZL\\STSRS\\data\\validated\\alignment\\trusted_alignment_keys.parquet",
+    "key_columns": [
+      "Timestamp",
+      "TrainID",
+      "SignalID"
+    ],
+    "compared_columns": [
+      "Speed",
+      "Distance",
+      "Location",
+      "SignalStatus",
+      "OverlapStatus",
+      "OverlapCount",
+      "PacketLoss",
+      "Latency",
+      "Burstiness",
+      "AttackInfo"
+    ],
+    "excluded_columns": [
+      "RenewalInterval"
+    ],
+    "trusted_row_count": 9992612,
+    "conflict_row_count": 0,
+    "conflict_row_ratio": 0.0,
+    "default_match_rate_min": 0.9999,
+    "audit_passed": true,
+    "failure_reasons": [],
+    "conflict_sample_path": "E:\\ZL\\STSRS\\data\\validated\\consistency\\field_conflict_samples.parquet",
+    "conflict_sample_rows": 0,
+    "column_metrics": [
+      {
+        "column_name": "Speed",
+        "logical_type": "numeric",
+        "match_count": 9992612,
+        "mismatch_count": 0,
+        "match_rate": 1.0
+      },
+      {
+        "column_name": "Distance",
+        "logical_type": "numeric",
+        "match_count": 9992612,
+        "mismatch_count": 0,
+        "match_rate": 1.0
+      },
+      {
+        "column_name": "Location",
+        "logical_type": "numeric",
+        "match_count": 9992612,
+        "mismatch_count": 0,
+        "match_rate": 1.0
+      },
+      {
+        "column_name": "SignalStatus",
+        "logical_type": "categorical",
+        "match_count": 9992612,
+        "mismatch_count": 0,
+        "match_rate": 1.0
+      },
+      {
+        "column_name": "OverlapStatus",
+        "logical_type": "categorical",
+        "match_count": 9992612,
+        "mismatch_count": 0,
+        "match_rate": 1.0
+      },
+      {
+        "column_name": "OverlapCount",
+        "logical_type": "numeric",
+        "match_count": 9992612,
+        "mismatch_count": 0,
+        "match_rate": 1.0
+      },
+      {
+        "column_name": "PacketLoss",
+        "logical_type": "numeric",
+        "match_count": 9992612,
+        "mismatch_count": 0,
+        "match_rate": 1.0
+      },
+      {
+        "column_name": "Latency",
+        "logical_type": "numeric",
+        "match_count": 9992612,
+        "mismatch_count": 0,
+        "match_rate": 1.0
+      },
+      {
+        "column_name": "Burstiness",
+        "logical_type": "numeric",
+        "match_count": 9992612,
+        "mismatch_count": 0,
+        "match_rate": 1.0
+      },
+      {
+        "column_name": "AttackInfo",
+        "logical_type": "categorical",
+        "match_count": 9992612,
+        "mismatch_count": 0,
+        "match_rate": 1.0
+      }
+    ]
+  }
+}

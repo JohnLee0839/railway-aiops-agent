@@ -1,0 +1,170 @@
+{
+  "generated_at": "2026-07-27T11:16:09.614438+00:00",
+  "report_path": "E:\\ZL\\STSRS\\reports\\model_training\\v2_diagnostics_report.md",
+  "result": {
+    "model_name": "v2_compact_top3_hist_gradient_boosting",
+    "model_path": "E:\\ZL\\STSRS\\models\\baseline\\v2_compact_top3_hist_gradient_boosting.pkl",
+    "reference_model_name": "v1_hist_gradient_boosting",
+    "reference_model_path": "E:\\ZL\\STSRS\\models\\baseline\\v1_hist_gradient_boosting.pkl",
+    "validation_sample_rows": 100000,
+    "permutation_repeats": 5,
+    "primary_scoring": "f1_macro",
+    "permutation_importance_path": "E:\\ZL\\STSRS\\reports\\model_training\\v2_permutation_importance.csv",
+    "leakage_check_path": "E:\\ZL\\STSRS\\reports\\model_training\\v2_split_leakage_checks.csv",
+    "class_metric_delta_path": "E:\\ZL\\STSRS\\reports\\model_training\\v2_vs_v1_class_metric_deltas.csv",
+    "top_permutation_importances": [
+      {
+        "feature_name": "Distance",
+        "mean_importance": 0.6425026777684941,
+        "std_importance": 0.0015616129186832458
+      },
+      {
+        "feature_name": "PacketLoss",
+        "mean_importance": 0.34379096159608913,
+        "std_importance": 0.0007798310596772717
+      },
+      {
+        "feature_name": "Latency",
+        "mean_importance": 0.013137839469024516,
+        "std_importance": 0.0002593956190502367
+      }
+    ],
+    "leakage_pair_metrics": [
+      {
+        "left_split": "train",
+        "right_split": "validation",
+        "exact_row_overlap_count": 0,
+        "feature_only_overlap_count": 0,
+        "conflicting_feature_overlap_count": 0
+      },
+      {
+        "left_split": "train",
+        "right_split": "test",
+        "exact_row_overlap_count": 0,
+        "feature_only_overlap_count": 0,
+        "conflicting_feature_overlap_count": 0
+      },
+      {
+        "left_split": "validation",
+        "right_split": "test",
+        "exact_row_overlap_count": 0,
+        "feature_only_overlap_count": 0,
+        "conflicting_feature_overlap_count": 0
+      }
+    ],
+    "class_metric_deltas": [
+      {
+        "split_name": "validation",
+        "label": "Normal",
+        "label_id": 0,
+        "v1_f1": 0.9991336578275719,
+        "v2_f1": 0.9986695436421091,
+        "f1_delta": -0.0004641141854627717,
+        "v1_precision": 0.9998623002016032,
+        "v2_precision": 0.9998126799610374,
+        "precision_delta": -4.9620240565761975e-05,
+        "v1_recall": 0.9984060766658435,
+        "v2_recall": 0.9975290183488076,
+        "recall_delta": -0.0008770583170358837
+      },
+      {
+        "split_name": "validation",
+        "label": "DoS",
+        "label_id": 1,
+        "v1_f1": 0.9990959494532329,
+        "v2_f1": 0.9985281002825448,
+        "f1_delta": -0.0005678491706880839,
+        "v1_precision": 0.9983599070614001,
+        "v2_precision": 0.9971601123969583,
+        "precision_delta": -0.0011997946644417556,
+        "v1_recall": 0.9998330779425855,
+        "v2_recall": 0.9998998467655513,
+        "recall_delta": 6.676882296585696e-05
+      },
+      {
+        "split_name": "validation",
+        "label": "Jamming",
+        "label_id": 2,
+        "v1_f1": 0.999134998558331,
+        "v2_f1": 0.9985056550212158,
+        "f1_delta": -0.0006293435371151901,
+        "v1_precision": 0.9983778940601612,
+        "v2_precision": 0.997311067552772,
+        "precision_delta": -0.001066826507389207,
+        "v1_recall": 0.9998932522050091,
+        "v2_recall": 0.9997031076951817,
+        "recall_delta": -0.00019014450982746123
+      },
+      {
+        "split_name": "validation",
+        "label": "ReplayAttack",
+        "label_id": 3,
+        "v1_f1": 0.9992132231845792,
+        "v2_f1": 0.9992965095538004,
+        "f1_delta": 8.328636922128041e-05,
+        "v1_precision": 0.9985673925211226,
+        "v2_precision": 0.9987337638536231,
+        "precision_delta": 0.0001663713325005256,
+        "v1_recall": 0.9998598897799602,
+        "v2_recall": 0.9998598897799602,
+        "recall_delta": 0.0
+      },
+      {
+        "split_name": "test",
+        "label": "Normal",
+        "label_id": 0,
+        "v1_f1": 0.999410730710612,
+        "v2_f1": 0.9992476048010827,
+        "f1_delta": -0.00016312590952938244,
+        "v1_precision": 0.9998986785906748,
+        "v2_precision": 0.9998541071076567,
+        "precision_delta": -4.457148301817426e-05,
+        "v1_recall": 0.9989232588327814,
+        "v2_recall": 0.9986418378458948,
+        "recall_delta": -0.0002814209868866602
+      },
+      {
+        "split_name": "test",
+        "label": "DoS",
+        "label_id": 1,
+        "v1_f1": 0.9990700402982537,
+        "v2_f1": 0.9985576042239211,
+        "f1_delta": -0.0005124360743326006,
+        "v1_precision": 0.9983213317434835,
+        "v2_precision": 0.997205607414455,
+        "precision_delta": -0.0011157243290285113,
+        "v1_recall": 0.9998198727100485,
+        "v2_recall": 0.9999132720455789,
+        "recall_delta": 9.339933553043078e-05
+      },
+      {
+        "split_name": "test",
+        "label": "Jamming",
+        "label_id": 2,
+        "v1_f1": 0.9991399483969038,
+        "v2_f1": 0.9986738549503862,
+        "f1_delta": -0.00046609344651760143,
+        "v1_precision": 0.9984676065346587,
+        "v2_precision": 0.9975503900737546,
+        "precision_delta": -0.0009172164609041467,
+        "v1_recall": 0.9998131963439856,
+        "v2_recall": 0.9997998532256989,
+        "recall_delta": -1.3343118286712752e-05
+      },
+      {
+        "split_name": "test",
+        "label": "ReplayAttack",
+        "label_id": 3,
+        "v1_f1": 0.9991300666948868,
+        "v2_f1": 0.9991315812721585,
+        "f1_delta": 1.514577271710671e-06,
+        "v1_precision": 0.9983813380938424,
+        "v2_precision": 0.9985573543277704,
+        "precision_delta": 0.00017601623392793364,
+        "v1_recall": 0.999879919145558,
+        "v2_recall": 0.9997064690224752,
+        "recall_delta": -0.00017345012308278562
+      }
+    ]
+  }
+}

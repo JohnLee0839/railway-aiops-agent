@@ -1,0 +1,31 @@
+experiment_name: v2_generalization_validation
+reference_model_manifest: metadata/manifests/v2_compact_tree_manifest.json
+reference_training_config: configs/modeling/v2_compact_top3_hist_gradient_boosting.yaml
+
+temporal_stability:
+  split_names:
+    - validation
+    - test
+  num_buckets: 4
+
+seed_stability:
+  sample_per_class: 200000
+  model_random_seeds:
+    - 7
+    - 21
+    - 42
+    - 84
+    - 2026
+  sample_salts:
+    - 7
+    - 21
+    - 42
+    - 84
+    - 2026
+
+iteration_notes:
+  parent_experiment: v2_compact_top3_hist_gradient_boosting
+  motivation:
+    - Verify that V2 stays stable across different future time windows.
+    - Measure sensitivity to retraining randomness and sample selection variation.
+    - Preserve a concrete generalization story beyond a single validation/test headline score.

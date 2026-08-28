@@ -1,0 +1,20 @@
+service_name: stsrs_model_service
+version: 1
+
+default_model_version: V2
+
+model_registry:
+  V0:
+    manifest_path: metadata/manifests/baseline_training_manifest.json
+    description: Linear SGD logistic baseline with full encoded feature set.
+  V1:
+    manifest_path: metadata/manifests/v1_tree_baseline_manifest.json
+    description: Tree-based high-performance baseline with full encoded feature set.
+  V2:
+    manifest_path: metadata/manifests/v2_compact_tree_manifest.json
+    description: Compact tree model using Distance, PacketLoss, and Latency.
+
+logging:
+  log_path: logs/inference/model_service.jsonl
+  include_raw_input: true
+  include_encoded_features: true

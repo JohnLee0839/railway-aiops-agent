@@ -1,0 +1,257 @@
+{
+  "generated_at": "2026-07-27T09:14:11.711399+00:00",
+  "report_path": "E:\\ZL\\STSRS\\reports\\data_validation\\feature_quality_report.md",
+  "result": {
+    "target_column": "AttackLabel",
+    "feature_columns": [
+      "Speed",
+      "Distance",
+      "Location",
+      "SignalStatus",
+      "OverlapStatus",
+      "OverlapCount",
+      "PacketLoss",
+      "Latency",
+      "Burstiness"
+    ],
+    "categorical_feature_columns": [
+      "SignalStatus",
+      "OverlapStatus"
+    ],
+    "numeric_feature_columns": [
+      "Speed",
+      "Distance",
+      "Location",
+      "OverlapCount",
+      "PacketLoss",
+      "Latency",
+      "Burstiness"
+    ],
+    "excluded_columns": [
+      "AttackInfo",
+      "AttackInfo_raw",
+      "AttackLabel",
+      "RenewalInterval",
+      "RenewalInterval_control_center",
+      "RenewalInterval_train",
+      "SignalID",
+      "SplitName",
+      "Timestamp",
+      "TrainID"
+    ],
+    "null_feature_ratio_warn_max": 0.0,
+    "target_column_required": true,
+    "manifest_required": true,
+    "audit_passed": true,
+    "failure_reasons": [],
+    "split_summaries": [
+      {
+        "split_name": "train",
+        "input_path": "E:\\ZL\\STSRS\\data\\serving\\train\\train.parquet",
+        "output_path": "E:\\ZL\\STSRS\\data\\features\\canonical\\train.parquet",
+        "row_count": 6994527,
+        "target_null_count": 0,
+        "target_distribution": {
+          "Normal": 3846855,
+          "DoS": 1049232,
+          "ReplayAttack": 1049226,
+          "Jamming": 1049214
+        },
+        "feature_metrics": [
+          {
+            "feature_name": "Speed",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Distance",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Location",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "SignalStatus",
+            "logical_type": "categorical",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "OverlapStatus",
+            "logical_type": "categorical",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "OverlapCount",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "PacketLoss",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Latency",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Burstiness",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          }
+        ]
+      },
+      {
+        "split_name": "validation",
+        "input_path": "E:\\ZL\\STSRS\\data\\serving\\validation\\validation.parquet",
+        "output_path": "E:\\ZL\\STSRS\\data\\features\\canonical\\validation.parquet",
+        "row_count": 1498290,
+        "target_null_count": 0,
+        "target_distribution": {
+          "Normal": 749095,
+          "Jamming": 299772,
+          "DoS": 299541,
+          "ReplayAttack": 149882
+        },
+        "feature_metrics": [
+          {
+            "feature_name": "Speed",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Distance",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Location",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "SignalStatus",
+            "logical_type": "categorical",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "OverlapStatus",
+            "logical_type": "categorical",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "OverlapCount",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "PacketLoss",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Latency",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Burstiness",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          }
+        ]
+      },
+      {
+        "split_name": "test",
+        "input_path": "E:\\ZL\\STSRS\\data\\serving\\test\\test.parquet",
+        "output_path": "E:\\ZL\\STSRS\\data\\features\\canonical\\test.parquet",
+        "row_count": 1498591,
+        "target_null_count": 0,
+        "target_distribution": {
+          "Normal": 899009,
+          "ReplayAttack": 299798,
+          "DoS": 149894,
+          "Jamming": 149890
+        },
+        "feature_metrics": [
+          {
+            "feature_name": "Speed",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Distance",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Location",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "SignalStatus",
+            "logical_type": "categorical",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "OverlapStatus",
+            "logical_type": "categorical",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "OverlapCount",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "PacketLoss",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Latency",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Burstiness",
+            "logical_type": "numeric",
+            "null_count": 0,
+            "null_ratio": 0.0
+          }
+        ]
+      }
+    ]
+  }
+}

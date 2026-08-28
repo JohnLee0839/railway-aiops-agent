@@ -1,0 +1,55 @@
+{
+  "generated_at": "2026-07-27T09:05:59.912333+00:00",
+  "report_path": "E:\\ZL\\STSRS\\reports\\data_validation\\label_quality_report.md",
+  "unknown_label_report_path": "E:\\ZL\\STSRS\\reports\\data_validation\\unknown_label_report.md",
+  "unknown_label_ratio_max": 0.0,
+  "result": {
+    "left_dataset_name": "control_center",
+    "right_dataset_name": "train",
+    "trusted_keys_path": "E:\\ZL\\STSRS\\data\\validated\\alignment\\trusted_alignment_keys.parquet",
+    "merged_dataset_path": "E:\\ZL\\STSRS\\data\\validated\\merged\\trusted_labeled_dataset.parquet",
+    "unknown_label_rows_path": "E:\\ZL\\STSRS\\data\\validated\\labels\\unknown_label_rows.parquet",
+    "source_column": "AttackInfo",
+    "raw_backup_column": "AttackInfo_raw",
+    "target_column": "AttackLabel",
+    "key_columns": [
+      "Timestamp",
+      "TrainID",
+      "SignalID"
+    ],
+    "allowed_targets": [
+      "Normal",
+      "DoS",
+      "Jamming",
+      "ReplayAttack"
+    ],
+    "trusted_row_count": 9992612,
+    "merged_row_count": 9992612,
+    "unknown_label_row_count": 0,
+    "unknown_label_ratio": 0.0,
+    "audit_passed": true,
+    "failure_reasons": [],
+    "label_distribution": [
+      {
+        "label": "Normal",
+        "row_count": 5495934,
+        "row_ratio": 0.54999973980777
+      },
+      {
+        "label": "ReplayAttack",
+        "row_count": 1498906,
+        "row_ratio": 0.15000142104987166
+      },
+      {
+        "label": "DoS",
+        "row_count": 1498896,
+        "row_ratio": 0.1500004203105254
+      },
+      {
+        "label": "Jamming",
+        "row_count": 1498876,
+        "row_ratio": 0.14999841883183296
+      }
+    ]
+  }
+}

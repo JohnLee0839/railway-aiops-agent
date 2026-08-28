@@ -1,0 +1,35 @@
+split_policy_name: time_based_with_purge_gap
+version: 1
+
+sort_by:
+  - Timestamp
+  - TrainID
+  - SignalID
+
+target_column: AttackLabel
+
+ratios:
+  train: 0.70
+  validation: 0.15
+  test: 0.15
+
+strategy:
+  type: time_based
+  random_seed: null
+  stratified: false
+  group_holdout: false
+
+purge_gap:
+  enabled: true
+  unit: seconds
+  value: 300
+
+leakage_controls:
+  disallow_random_split: true
+  disallow_target_in_features: true
+  disallow_raw_identifier_features_by_default: true
+
+output_names:
+  train: train.parquet
+  validation: validation.parquet
+  test: test.parquet

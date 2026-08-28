@@ -1,0 +1,1028 @@
+{
+  "generated_at": "2026-07-27T11:03:00.266892+00:00",
+  "report_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_report.md",
+  "result": {
+    "experiment_name": "v1_ablation_hist_gradient_boosting",
+    "config_path": "E:\\ZL\\STSRS\\configs\\modeling\\v1_ablation_hist_gradient_boosting.yaml",
+    "reference_manifest_path": "E:\\ZL\\STSRS\\metadata\\manifests\\v1_tree_baseline_manifest.json",
+    "parent_experiment": "v1_hist_gradient_boosting",
+    "feature_manifest_path": "E:\\ZL\\STSRS\\metadata\\manifests\\feature_manifest.json",
+    "encoded_feature_manifest_path": "E:\\ZL\\STSRS\\metadata\\manifests\\encoded_feature_manifest.json",
+    "target_column": "AttackLabel",
+    "target_id_column": "AttackLabelId",
+    "target_mapping": {
+      "Normal": 0,
+      "DoS": 1,
+      "Jamming": 2,
+      "ReplayAttack": 3
+    },
+    "full_training_rows": 6994527,
+    "sample_per_class": 200000,
+    "primary_metric_name": "validation_macro_f1",
+    "sample_hash_columns": [
+      "Speed",
+      "Distance",
+      "Location",
+      "OverlapCount",
+      "PacketLoss",
+      "Latency",
+      "Burstiness",
+      "SignalStatus__is_Green",
+      "SignalStatus__is_Yellow",
+      "SignalStatus__is_Red",
+      "OverlapStatus__is_Yes",
+      "OverlapStatus__is_No"
+    ],
+    "variants": [
+      {
+        "variant_name": "full_reference",
+        "description": "Re-run the preserved V1 feature set as the ablation anchor.",
+        "model_name": "v1_ablation_hist_gradient_boosting_full_reference",
+        "model_path": "E:\\ZL\\STSRS\\models\\baseline\\v1_ablation_hist_gradient_boosting_full_reference.pkl",
+        "feature_columns": [
+          "Speed",
+          "Distance",
+          "Location",
+          "OverlapCount",
+          "PacketLoss",
+          "Latency",
+          "Burstiness",
+          "SignalStatus__is_Green",
+          "SignalStatus__is_Yellow",
+          "SignalStatus__is_Red",
+          "OverlapStatus__is_Yes",
+          "OverlapStatus__is_No"
+        ],
+        "dropped_features": [],
+        "feature_count": 12,
+        "sampled_training_rows": 800000,
+        "validation_macro_f1": 0.9990395413435391,
+        "test_macro_f1": 0.9991373505179751,
+        "validation_macro_f1_delta_vs_reference": 0.0,
+        "test_macro_f1_delta_vs_reference": 0.0,
+        "split_evaluations": [
+          {
+            "split_name": "train",
+            "row_count": 6994527,
+            "accuracy": 0.9992379756343781,
+            "balanced_accuracy": 0.9995959095805503,
+            "macro_precision": 0.998789784088637,
+            "macro_recall": 0.9995959095805503,
+            "macro_f1": 0.999192270447983,
+            "weighted_f1": 0.9992380825142024,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_full_reference_train_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.9999133307011546,
+                "recall": 0.9987010168046365,
+                "f1": 0.9993068060719106,
+                "support": 3846855
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.9983423053755173,
+                "recall": 0.9998884898668741,
+                "f1": 0.9991147994204055,
+                "support": 1049232
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.9975863970937863,
+                "recall": 0.9997979439847352,
+                "f1": 0.9986909462031252,
+                "support": 1049214
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.9993171031840897,
+                "recall": 0.9999961876659557,
+                "f1": 0.9996565300964908,
+                "support": 1049226
+              }
+            ]
+          },
+          {
+            "split_name": "validation",
+            "row_count": 1498290,
+            "accuracy": 0.9989628176120777,
+            "balanced_accuracy": 0.9994138069763286,
+            "macro_precision": 0.9986666888444471,
+            "macro_recall": 0.9994138069763286,
+            "macro_f1": 0.9990395413435391,
+            "weighted_f1": 0.998962863120089,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_full_reference_validation_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.9998194731021608,
+                "recall": 0.9981057142285024,
+                "f1": 0.9989618586604636,
+                "support": 749095
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.998220112726194,
+                "recall": 0.9998130472956958,
+                "f1": 0.9990159450263526,
+                "support": 299541
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.9974804459976702,
+                "recall": 0.9997364663811164,
+                "f1": 0.9986071820093232,
+                "support": 299772
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.9991467235517633,
+                "recall": 1.0,
+                "f1": 0.9995731796780174,
+                "support": 149882
+              }
+            ]
+          },
+          {
+            "split_name": "test",
+            "row_count": 1498591,
+            "accuracy": 0.9993393794571034,
+            "balanced_accuracy": 0.9995595895780487,
+            "macro_precision": 0.9987160097033204,
+            "macro_recall": 0.9995595895780487,
+            "macro_f1": 0.9991373505179751,
+            "weighted_f1": 0.9993394888848924,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_full_reference_test_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.9998664082408303,
+                "recall": 0.9990322677526031,
+                "f1": 0.9994491639532891,
+                "support": 899009
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.9981417467580475,
+                "recall": 0.9997865158045018,
+                "f1": 0.9989634542636692,
+                "support": 149894
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.997649127246815,
+                "recall": 0.99942624591367,
+                "f1": 0.9985368958863112,
+                "support": 149890
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.9992067565675891,
+                "recall": 0.9999933288414199,
+                "f1": 0.9995998879686313,
+                "support": 299798
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "variant_name": "drop_distance",
+        "description": "Remove Distance and measure how much the V1 result depends on it.",
+        "model_name": "v1_ablation_hist_gradient_boosting_drop_distance",
+        "model_path": "E:\\ZL\\STSRS\\models\\baseline\\v1_ablation_hist_gradient_boosting_drop_distance.pkl",
+        "feature_columns": [
+          "Speed",
+          "Location",
+          "OverlapCount",
+          "PacketLoss",
+          "Latency",
+          "Burstiness",
+          "SignalStatus__is_Green",
+          "SignalStatus__is_Yellow",
+          "SignalStatus__is_Red",
+          "OverlapStatus__is_Yes",
+          "OverlapStatus__is_No"
+        ],
+        "dropped_features": [
+          "Distance"
+        ],
+        "feature_count": 11,
+        "sampled_training_rows": 800000,
+        "validation_macro_f1": 0.9050525322050671,
+        "test_macro_f1": 0.8842358763776565,
+        "validation_macro_f1_delta_vs_reference": -0.09398700913847202,
+        "test_macro_f1_delta_vs_reference": -0.1149014741403186,
+        "split_evaluations": [
+          {
+            "split_name": "train",
+            "row_count": 6994527,
+            "accuracy": 0.9160750970008408,
+            "balanced_accuracy": 0.927065228635658,
+            "macro_precision": 0.8790133664405249,
+            "macro_recall": 0.927065228635658,
+            "macro_f1": 0.8996746431392885,
+            "weighted_f1": 0.9178754134827849,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_drop_distance_train_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.995638346415417,
+                "recall": 0.899588365041053,
+                "f1": 0.945179451946105,
+                "support": 3846855
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.8254073900906228,
+                "recall": 0.8580962075117801,
+                "f1": 0.841434437203069,
+                "support": 1049232
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.7737794764548929,
+                "recall": 0.9510833824176955,
+                "f1": 0.8533186252188579,
+                "support": 1049214
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.9212282528011666,
+                "recall": 0.9994929595721036,
+                "f1": 0.9587660581891222,
+                "support": 1049226
+              }
+            ]
+          },
+          {
+            "split_name": "validation",
+            "row_count": 1498290,
+            "accuracy": 0.9115785328607946,
+            "balanced_accuracy": 0.9270008502104273,
+            "macro_precision": 0.888718445962869,
+            "macro_recall": 0.9270008502104273,
+            "macro_f1": 0.9050525322050671,
+            "weighted_f1": 0.9128727385940008,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_drop_distance_validation_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.993739337631948,
+                "recall": 0.8996949652580781,
+                "f1": 0.9443816217776527,
+                "support": 749095
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.860435536454254,
+                "recall": 0.8581863584617798,
+                "f1": 0.859309475696934,
+                "support": 299541
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.8047642713533784,
+                "recall": 0.9507092056629706,
+                "f1": 0.8716700208592035,
+                "support": 299772
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.8959346384118952,
+                "recall": 0.999412871458881,
+                "f1": 0.9448490104864778,
+                "support": 149882
+              }
+            ]
+          },
+          {
+            "split_name": "test",
+            "row_count": 1498591,
+            "accuracy": 0.9204813054395763,
+            "balanced_accuracy": 0.9267991561784434,
+            "macro_precision": 0.8530122937638873,
+            "macro_recall": 0.9267991561784434,
+            "macro_f1": 0.8842358763776565,
+            "weighted_f1": 0.92329761855666,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_drop_distance_test_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.997325283286905,
+                "recall": 0.8996105711956165,
+                "f1": 0.9459511934949612,
+                "support": 899009
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.762057744400121,
+                "recall": 0.8577127837004817,
+                "f1": 0.8070608249137641,
+                "support": 149894
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.7173937129216482,
+                "recall": 0.9503635999733138,
+                "f1": 0.8176068140597378,
+                "support": 149890
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.9352724344468755,
+                "recall": 0.9995096698443618,
+                "f1": 0.9663246730421631,
+                "support": 299798
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "variant_name": "drop_packetloss",
+        "description": "Remove PacketLoss and measure how much the V1 result depends on it.",
+        "model_name": "v1_ablation_hist_gradient_boosting_drop_packetloss",
+        "model_path": "E:\\ZL\\STSRS\\models\\baseline\\v1_ablation_hist_gradient_boosting_drop_packetloss.pkl",
+        "feature_columns": [
+          "Speed",
+          "Distance",
+          "Location",
+          "OverlapCount",
+          "Latency",
+          "Burstiness",
+          "SignalStatus__is_Green",
+          "SignalStatus__is_Yellow",
+          "SignalStatus__is_Red",
+          "OverlapStatus__is_Yes",
+          "OverlapStatus__is_No"
+        ],
+        "dropped_features": [
+          "PacketLoss"
+        ],
+        "feature_count": 11,
+        "sampled_training_rows": 800000,
+        "validation_macro_f1": 0.9953481452410314,
+        "test_macro_f1": 0.995412741448795,
+        "validation_macro_f1_delta_vs_reference": -0.0036913961025076825,
+        "test_macro_f1_delta_vs_reference": -0.0037246090691801514,
+        "split_evaluations": [
+          {
+            "split_name": "train",
+            "row_count": 6994527,
+            "accuracy": 0.9958187308448448,
+            "balanced_accuracy": 0.9975089797043794,
+            "macro_precision": 0.9936745486516232,
+            "macro_recall": 0.9975089797043794,
+            "macro_f1": 0.9955778611651956,
+            "weighted_f1": 0.9958217426782385,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_drop_packetloss_train_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.9991091466608165,
+                "recall": 0.9932830844936968,
+                "f1": 0.9961875974250964,
+                "support": 3846855
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.9967556232378367,
+                "recall": 0.9993604846211324,
+                "f1": 0.9980563543031955,
+                "support": 1049232
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.9915374433125081,
+                "recall": 0.9987924293804695,
+                "f1": 0.9951517137084808,
+                "support": 1049214
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.9872959813953313,
+                "recall": 0.9985999203222184,
+                "f1": 0.9929157792240099,
+                "support": 1049226
+              }
+            ]
+          },
+          {
+            "split_name": "validation",
+            "row_count": 1498290,
+            "accuracy": 0.9957351380573854,
+            "balanced_accuracy": 0.9972622739641513,
+            "macro_precision": 0.9934634947336175,
+            "macro_recall": 0.9972622739641513,
+            "macro_f1": 0.9953481452410314,
+            "weighted_f1": 0.9957367811892971,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_drop_packetloss_validation_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.9988970198039355,
+                "recall": 0.9925656959397673,
+                "f1": 0.9957212934951608,
+                "support": 749095
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.9965408752684234,
+                "recall": 0.9992822351531176,
+                "f1": 0.9979096725153608,
+                "support": 299541
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.991636968243664,
+                "recall": 0.9987557210146378,
+                "f1": 0.9951836143168643,
+                "support": 299772
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.9867791156184472,
+                "recall": 0.9984454437490826,
+                "f1": 0.99257800063674,
+                "support": 149882
+              }
+            ]
+          },
+          {
+            "split_name": "test",
+            "row_count": 1498591,
+            "accuracy": 0.9955765115365033,
+            "balanced_accuracy": 0.9973733492787145,
+            "macro_precision": 0.9934790171682332,
+            "macro_recall": 0.9973733492787145,
+            "macro_f1": 0.995412741448795,
+            "weighted_f1": 0.9955809875638781,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_drop_packetloss_test_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.9990280924889109,
+                "recall": 0.9935929451206829,
+                "f1": 0.9963031062495852,
+                "support": 899009
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.9964868389535039,
+                "recall": 0.9991327204557887,
+                "f1": 0.9978080256907383,
+                "support": 149894
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.9913490454804393,
+                "recall": 0.9984655413970245,
+                "f1": 0.9948945675007312,
+                "support": 149890
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.9870520917500784,
+                "recall": 0.9983021901413619,
+                "f1": 0.9926452663541251,
+                "support": 299798
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "variant_name": "drop_latency",
+        "description": "Remove Latency and test whether its small permutation score still matters.",
+        "model_name": "v1_ablation_hist_gradient_boosting_drop_latency",
+        "model_path": "E:\\ZL\\STSRS\\models\\baseline\\v1_ablation_hist_gradient_boosting_drop_latency.pkl",
+        "feature_columns": [
+          "Speed",
+          "Distance",
+          "Location",
+          "OverlapCount",
+          "PacketLoss",
+          "Burstiness",
+          "SignalStatus__is_Green",
+          "SignalStatus__is_Yellow",
+          "SignalStatus__is_Red",
+          "OverlapStatus__is_Yes",
+          "OverlapStatus__is_No"
+        ],
+        "dropped_features": [
+          "Latency"
+        ],
+        "feature_count": 11,
+        "sampled_training_rows": 800000,
+        "validation_macro_f1": 0.9981144524877359,
+        "test_macro_f1": 0.998254301700727,
+        "validation_macro_f1_delta_vs_reference": -0.0009250888558032244,
+        "test_macro_f1_delta_vs_reference": -0.0008830488172480999,
+        "split_evaluations": [
+          {
+            "split_name": "train",
+            "row_count": 6994527,
+            "accuracy": 0.9983455636099482,
+            "balanced_accuracy": 0.9990136775913251,
+            "macro_precision": 0.9974837758048446,
+            "macro_recall": 0.9990136775913251,
+            "macro_f1": 0.9982468808226652,
+            "weighted_f1": 0.9983457942052987,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_drop_latency_train_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.9996477320011766,
+                "recall": 0.9973432843192686,
+                "f1": 0.9984941785400402,
+                "support": 3846855
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.9973935724603021,
+                "recall": 0.9996740473031703,
+                "f1": 0.9985325078313055,
+                "support": 1049232
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.9965444357432315,
+                "recall": 0.999395738143029,
+                "f1": 0.997968050327634,
+                "support": 1049214
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.9963493630146681,
+                "recall": 0.9996416405998326,
+                "f1": 0.9979927865916812,
+                "support": 1049226
+              }
+            ]
+          },
+          {
+            "split_name": "validation",
+            "row_count": 1498290,
+            "accuracy": 0.998123193774236,
+            "balanced_accuracy": 0.9988078161194135,
+            "macro_precision": 0.997424809899391,
+            "macro_recall": 0.9988078161194135,
+            "macro_f1": 0.9981144524877359,
+            "weighted_f1": 0.9981232037925756,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_drop_latency_validation_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.9994485394996968,
+                "recall": 0.9967961340016954,
+                "f1": 0.9981205746282921,
+                "support": 749095
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.9972521524805569,
+                "recall": 0.999562664209574,
+                "f1": 0.998406071600064,
+                "support": 299541
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.9965235384722865,
+                "recall": 0.999252765435064,
+                "f1": 0.997886285842779,
+                "support": 299772
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.9964750091450234,
+                "recall": 0.9996197008313207,
+                "f1": 0.9980448778798083,
+                "support": 149882
+              }
+            ]
+          },
+          {
+            "split_name": "test",
+            "row_count": 1498591,
+            "accuracy": 0.9984198490448695,
+            "balanced_accuracy": 0.9990213087045092,
+            "macro_precision": 0.9974904970578148,
+            "macro_recall": 0.9990213087045092,
+            "macro_f1": 0.998254301700727,
+            "weighted_f1": 0.9984202451891319,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_drop_latency_test_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.999625548721572,
+                "recall": 0.9977397334175743,
+                "f1": 0.9986817508219573,
+                "support": 899009
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.9973704707190265,
+                "recall": 0.9995196605601292,
+                "f1": 0.9984439090869712,
+                "support": 149894
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.9968192706947032,
+                "recall": 0.9994129027953833,
+                "f1": 0.9981144018389579,
+                "support": 149890
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.9961466980959569,
+                "recall": 0.9994129380449502,
+                "f1": 0.9977771450550219,
+                "support": 299798
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "variant_name": "top3_only",
+        "description": "Keep only Distance, PacketLoss, and Latency.",
+        "model_name": "v1_ablation_hist_gradient_boosting_top3_only",
+        "model_path": "E:\\ZL\\STSRS\\models\\baseline\\v1_ablation_hist_gradient_boosting_top3_only.pkl",
+        "feature_columns": [
+          "Distance",
+          "PacketLoss",
+          "Latency"
+        ],
+        "dropped_features": [
+          "Speed",
+          "Location",
+          "OverlapCount",
+          "Burstiness",
+          "SignalStatus__is_Green",
+          "SignalStatus__is_Yellow",
+          "SignalStatus__is_Red",
+          "OverlapStatus__is_Yes",
+          "OverlapStatus__is_No"
+        ],
+        "feature_count": 3,
+        "sampled_training_rows": 800000,
+        "validation_macro_f1": 0.998494655414867,
+        "test_macro_f1": 0.9986539861289336,
+        "validation_macro_f1_delta_vs_reference": -0.0005448859286720786,
+        "test_macro_f1_delta_vs_reference": -0.00048336438904150736,
+        "split_evaluations": [
+          {
+            "split_name": "train",
+            "row_count": 6994527,
+            "accuracy": 0.998734010176814,
+            "balanced_accuracy": 0.9993515771315128,
+            "macro_precision": 0.9979685062438366,
+            "macro_recall": 0.9993515771315128,
+            "macro_f1": 0.9986584695142328,
+            "weighted_f1": 0.9987342218290747,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_top3_only_train_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.9998903315114297,
+                "recall": 0.99780755968187,
+                "f1": 0.998847859862287,
+                "support": 3846855
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.9973990664778074,
+                "recall": 0.9999637830336856,
+                "f1": 0.9986797781418092,
+                "support": 1049232
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.996343927300291,
+                "recall": 0.9997197902429819,
+                "f1": 0.9980290040404703,
+                "support": 1049214
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.9982406996858189,
+                "recall": 0.9999151755675135,
+                "f1": 0.9990772360123644,
+                "support": 1049226
+              }
+            ]
+          },
+          {
+            "split_name": "validation",
+            "row_count": 1498290,
+            "accuracy": 0.9984108550414139,
+            "balanced_accuracy": 0.9991209833323982,
+            "macro_precision": 0.9978720463004571,
+            "macro_recall": 0.9991209833323982,
+            "macro_f1": 0.998494655414867,
+            "weighted_f1": 0.9984109206704206,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_top3_only_validation_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.9998099057828803,
+                "recall": 0.997011060012415,
+                "f1": 0.9984085213953946,
+                "support": 749095
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.9971900666859767,
+                "recall": 0.9999265542947376,
+                "f1": 0.9985564356963781,
+                "support": 299541
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.9962333901815486,
+                "recall": 0.9996530696662798,
+                "f1": 0.9979403003465025,
+                "support": 299772
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.9982548225514228,
+                "recall": 0.9998932493561602,
+                "f1": 0.9990733642211926,
+                "support": 149882
+              }
+            ]
+          },
+          {
+            "split_name": "test",
+            "row_count": 1498591,
+            "accuracy": 0.998904971403138,
+            "balanced_accuracy": 0.9993924566399673,
+            "macro_precision": 0.9979182140462028,
+            "macro_recall": 0.9993924566399673,
+            "macro_f1": 0.9986539861289336,
+            "weighted_f1": 0.9989052221921979,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_top3_only_test_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.9998607425430417,
+                "recall": 0.998313698750513,
+                "f1": 0.9990866217640055,
+                "support": 899009
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.9972256227379178,
+                "recall": 0.9999533003322347,
+                "f1": 0.9985875988514247,
+                "support": 149894
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.9964876569079407,
+                "recall": 0.9993928881179531,
+                "f1": 0.9979381580656659,
+                "support": 149890
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.9980988339959114,
+                "recall": 0.9999099393591685,
+                "f1": 0.9990035658346386,
+                "support": 299798
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "variant_name": "top2_distance_packetloss",
+        "description": "Keep only Distance and PacketLoss to test whether Latency is optional.",
+        "model_name": "v1_ablation_hist_gradient_boosting_top2_distance_packetloss",
+        "model_path": "E:\\ZL\\STSRS\\models\\baseline\\v1_ablation_hist_gradient_boosting_top2_distance_packetloss.pkl",
+        "feature_columns": [
+          "Distance",
+          "PacketLoss"
+        ],
+        "dropped_features": [
+          "Speed",
+          "Location",
+          "OverlapCount",
+          "Latency",
+          "Burstiness",
+          "SignalStatus__is_Green",
+          "SignalStatus__is_Yellow",
+          "SignalStatus__is_Red",
+          "OverlapStatus__is_Yes",
+          "OverlapStatus__is_No"
+        ],
+        "feature_count": 2,
+        "sampled_training_rows": 800000,
+        "validation_macro_f1": 0.9970309854498283,
+        "test_macro_f1": 0.9971839853507969,
+        "validation_macro_f1_delta_vs_reference": -0.0020085558937108505,
+        "test_macro_f1_delta_vs_reference": -0.001953365167178256,
+        "split_evaluations": [
+          {
+            "split_name": "train",
+            "row_count": 6994527,
+            "accuracy": 0.9972415575778033,
+            "balanced_accuracy": 0.9986168496096954,
+            "macro_precision": 0.9955570955105227,
+            "macro_recall": 0.9986168496096954,
+            "macro_f1": 0.9970796003148376,
+            "weighted_f1": 0.9972423169578668,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_top2_distance_packetloss_train_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.9998051737596737,
+                "recall": 0.9951783989778663,
+                "f1": 0.9974864211504358,
+                "support": 3846855
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.9937600163671702,
+                "recall": 0.9999542522530765,
+                "f1": 0.9968475119287185,
+                "support": 1049232
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.995284303113726,
+                "recall": 0.9999561576570652,
+                "f1": 0.9976147608128545,
+                "support": 1049214
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.993378888801521,
+                "recall": 0.9993785895507736,
+                "f1": 0.9963697073673418,
+                "support": 1049226
+              }
+            ]
+          },
+          {
+            "split_name": "validation",
+            "row_count": 1498290,
+            "accuracy": 0.997112708487676,
+            "balanced_accuracy": 0.9984153209666031,
+            "macro_precision": 0.9956619071995658,
+            "macro_recall": 0.9984153209666031,
+            "macro_f1": 0.9970309854498283,
+            "weighted_f1": 0.9971127897957349,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_top2_distance_packetloss_validation_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.999832219044078,
+                "recall": 0.9943918995588009,
+                "f1": 0.9971046386018737,
+                "support": 749095
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.9937427424438473,
+                "recall": 0.999943246500479,
+                "f1": 0.996833352469669,
+                "support": 299541
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.9955595410086517,
+                "recall": 0.9999532978396914,
+                "f1": 0.9977515822969142,
+                "support": 299772
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.9935131263016861,
+                "recall": 0.9993728399674411,
+                "f1": 0.9964343684308561,
+                "support": 149882
+              }
+            ]
+          },
+          {
+            "split_name": "test",
+            "row_count": 1498591,
+            "accuracy": 0.9974289182305245,
+            "balanced_accuracy": 0.9987823586238258,
+            "macro_precision": 0.9955990669088319,
+            "macro_recall": 0.9987823586238258,
+            "macro_f1": 0.9971839853507969,
+            "weighted_f1": 0.9974302008541664,
+            "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_ablation_hist_gradient_boosting_top2_distance_packetloss_test_confusion_matrix.csv",
+            "class_metrics": [
+              {
+                "label": "Normal",
+                "label_id": 0,
+                "precision": 0.999743193511505,
+                "recall": 0.9959700069743462,
+                "f1": 0.997853033363516,
+                "support": 899009
+              },
+              {
+                "label": "DoS",
+                "label_id": 1,
+                "precision": 0.9936817958815651,
+                "recall": 0.9999132720455789,
+                "f1": 0.9967877949509191,
+                "support": 149894
+              },
+              {
+                "label": "Jamming",
+                "label_id": 2,
+                "precision": 0.995655495399741,
+                "recall": 0.9999399559677097,
+                "f1": 0.9977931264042605,
+                "support": 149890
+              },
+              {
+                "label": "ReplayAttack",
+                "label_id": 3,
+                "precision": 0.9933157828425164,
+                "recall": 0.9993061995076685,
+                "f1": 0.9963019866844917,
+                "support": 299798
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

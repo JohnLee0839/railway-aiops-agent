@@ -1,0 +1,80 @@
+{
+  "generated_at": "2026-07-27T08:38:02.891868+00:00",
+  "report_path": "E:\\ZL\\STSRS\\reports\\data_validation\\key_audit_report.md",
+  "key_columns": [
+    "Timestamp",
+    "TrainID",
+    "SignalID"
+  ],
+  "thresholds": {
+    "null_key_rows_max": 0,
+    "duplicate_key_rows_max": 0
+  },
+  "sample_limit": 100,
+  "results": [
+    {
+      "dataset_name": "control_center",
+      "source_name": "ControlCenter",
+      "staging_path": "E:\\ZL\\STSRS\\data\\staging\\control_center.parquet",
+      "key_columns": [
+        "Timestamp",
+        "TrainID",
+        "SignalID"
+      ],
+      "row_count": 10000000,
+      "null_key_row_count": 0,
+      "null_key_counts_by_column": {
+        "Timestamp": 0,
+        "TrainID": 0,
+        "SignalID": 0
+      },
+      "non_null_key_row_count": 10000000,
+      "distinct_key_count": 9996306,
+      "distinct_non_null_key_count": 9996306,
+      "duplicate_key_group_count": 3694,
+      "duplicate_key_row_count": 7388,
+      "max_duplicate_key_occurrence_count": 2,
+      "key_unique": false,
+      "key_audit_passed": false,
+      "failure_reasons": [
+        "Duplicate-key row count 7388 exceeds configured maximum 0."
+      ],
+      "null_key_sample_path": "E:\\ZL\\STSRS\\data\\validated\\keys\\control_center_null_key_samples.parquet",
+      "null_key_sample_rows": 0,
+      "duplicate_key_sample_path": "E:\\ZL\\STSRS\\data\\validated\\keys\\control_center_duplicate_key_samples.parquet",
+      "duplicate_key_sample_rows": 100
+    },
+    {
+      "dataset_name": "train",
+      "source_name": "Train",
+      "staging_path": "E:\\ZL\\STSRS\\data\\staging\\train.parquet",
+      "key_columns": [
+        "Timestamp",
+        "TrainID",
+        "SignalID"
+      ],
+      "row_count": 10000000,
+      "null_key_row_count": 0,
+      "null_key_counts_by_column": {
+        "Timestamp": 0,
+        "TrainID": 0,
+        "SignalID": 0
+      },
+      "non_null_key_row_count": 10000000,
+      "distinct_key_count": 9996306,
+      "distinct_non_null_key_count": 9996306,
+      "duplicate_key_group_count": 3694,
+      "duplicate_key_row_count": 7388,
+      "max_duplicate_key_occurrence_count": 2,
+      "key_unique": false,
+      "key_audit_passed": false,
+      "failure_reasons": [
+        "Duplicate-key row count 7388 exceeds configured maximum 0."
+      ],
+      "null_key_sample_path": "E:\\ZL\\STSRS\\data\\validated\\keys\\train_null_key_samples.parquet",
+      "null_key_sample_rows": 0,
+      "duplicate_key_sample_path": "E:\\ZL\\STSRS\\data\\validated\\keys\\train_duplicate_key_samples.parquet",
+      "duplicate_key_sample_rows": 100
+    }
+  ]
+}

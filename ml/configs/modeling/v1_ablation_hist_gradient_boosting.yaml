@@ -1,0 +1,57 @@
+experiment_name: v1_ablation_hist_gradient_boosting
+version: 1
+reference_model_manifest: metadata/manifests/v1_tree_baseline_manifest.json
+
+training:
+  sample_per_class: 200000
+  random_seed: 42
+  batch_size: 100000
+
+model:
+  family: HistGradientBoostingClassifier
+  learning_rate: 0.1
+  max_iter: 300
+  max_leaf_nodes: 31
+  min_samples_leaf: 50
+  l2_regularization: 0.0
+  early_stopping: true
+  validation_fraction: 0.1
+  n_iter_no_change: 20
+
+evaluation:
+  primary_metric: validation_macro_f1
+  emit_confusion_matrix: true
+
+iteration_notes:
+  parent_experiment: v1_hist_gradient_boosting
+  motivation:
+    - Validate whether the near-perfect V1 score is dominated by a tiny subset of features.
+    - Separate feature dependence from sample randomness by keeping the balanced row sample fixed across variants.
+    - Preserve a clear experiment trail for later V2 modeling decisions.
+
+variants:
+  - variant_name: full_reference
+    description: Re-run the preserved V1 feature set as the ablation anchor.
+  - variant_name: drop_distance
+    description: Remove Distance and measure how much the V1 result depends on it.
+    drop_features:
+      - Distance
+  - variant_name: drop_packetloss
+    description: Remove PacketLoss and measure how much the V1 result depends on it.
+    drop_features:
+      - PacketLoss
+  - variant_name: drop_latency
+    description: Remove Latency and test whether its small permutation score still matters.
+    drop_features:
+      - Latency
+  - variant_name: top3_only
+    description: Keep only Distance, PacketLoss, and Latency.
+    include_features:
+      - Distance
+      - PacketLoss
+      - Latency
+  - variant_name: top2_distance_packetloss
+    description: Keep only Distance and PacketLoss to test whether Latency is optional.
+    include_features:
+      - Distance
+      - PacketLoss

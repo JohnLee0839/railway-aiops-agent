@@ -1,0 +1,252 @@
+{
+  "generated_at": "2026-07-27T09:18:04.725505+00:00",
+  "report_path": "E:\\ZL\\STSRS\\reports\\data_validation\\encoded_feature_report.md",
+  "result": {
+    "target_column": "AttackLabel",
+    "target_id_column": "AttackLabelId",
+    "target_mapping": {
+      "Normal": 0,
+      "DoS": 1,
+      "Jamming": 2,
+      "ReplayAttack": 3
+    },
+    "numeric_feature_columns": [
+      "Speed",
+      "Distance",
+      "Location",
+      "OverlapCount",
+      "PacketLoss",
+      "Latency",
+      "Burstiness"
+    ],
+    "categorical_feature_columns": [
+      "SignalStatus",
+      "OverlapStatus"
+    ],
+    "encoded_feature_columns": [
+      "Speed",
+      "Distance",
+      "Location",
+      "OverlapCount",
+      "PacketLoss",
+      "Latency",
+      "Burstiness",
+      "SignalStatus__is_Green",
+      "SignalStatus__is_Yellow",
+      "SignalStatus__is_Red",
+      "OverlapStatus__is_Yes",
+      "OverlapStatus__is_No"
+    ],
+    "audit_passed": true,
+    "failure_reasons": [],
+    "split_summaries": [
+      {
+        "split_name": "train",
+        "input_path": "E:\\ZL\\STSRS\\data\\features\\canonical\\train.parquet",
+        "output_path": "E:\\ZL\\STSRS\\data\\features\\encoded\\train.parquet",
+        "row_count": 6994527,
+        "target_id_null_count": 0,
+        "encoded_feature_metrics": [
+          {
+            "feature_name": "Speed",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Distance",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Location",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "OverlapCount",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "PacketLoss",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Latency",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Burstiness",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "SignalStatus__is_Green",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "SignalStatus__is_Yellow",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "SignalStatus__is_Red",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "OverlapStatus__is_Yes",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "OverlapStatus__is_No",
+            "null_count": 0,
+            "null_ratio": 0.0
+          }
+        ]
+      },
+      {
+        "split_name": "validation",
+        "input_path": "E:\\ZL\\STSRS\\data\\features\\canonical\\validation.parquet",
+        "output_path": "E:\\ZL\\STSRS\\data\\features\\encoded\\validation.parquet",
+        "row_count": 1498290,
+        "target_id_null_count": 0,
+        "encoded_feature_metrics": [
+          {
+            "feature_name": "Speed",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Distance",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Location",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "OverlapCount",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "PacketLoss",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Latency",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Burstiness",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "SignalStatus__is_Green",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "SignalStatus__is_Yellow",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "SignalStatus__is_Red",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "OverlapStatus__is_Yes",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "OverlapStatus__is_No",
+            "null_count": 0,
+            "null_ratio": 0.0
+          }
+        ]
+      },
+      {
+        "split_name": "test",
+        "input_path": "E:\\ZL\\STSRS\\data\\features\\canonical\\test.parquet",
+        "output_path": "E:\\ZL\\STSRS\\data\\features\\encoded\\test.parquet",
+        "row_count": 1498591,
+        "target_id_null_count": 0,
+        "encoded_feature_metrics": [
+          {
+            "feature_name": "Speed",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Distance",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Location",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "OverlapCount",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "PacketLoss",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Latency",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "Burstiness",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "SignalStatus__is_Green",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "SignalStatus__is_Yellow",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "SignalStatus__is_Red",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "OverlapStatus__is_Yes",
+            "null_count": 0,
+            "null_ratio": 0.0
+          },
+          {
+            "feature_name": "OverlapStatus__is_No",
+            "null_count": 0,
+            "null_ratio": 0.0
+          }
+        ]
+      }
+    ]
+  }
+}

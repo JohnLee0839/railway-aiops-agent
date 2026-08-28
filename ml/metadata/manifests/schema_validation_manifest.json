@@ -1,0 +1,350 @@
+{
+  "generated_at": "2026-07-27T07:51:11.707699+00:00",
+  "report_path": "D:\\STUDY\\Security-Threats-in-Smart-Railway-Systems-STSRS--main\\reports\\data_validation\\schema_report.md",
+  "results": [
+    {
+      "dataset_name": "control_center",
+      "source_name": "ControlCenter",
+      "raw_path": "D:\\STUDY\\Security-Threats-in-Smart-Railway-Systems-STSRS--main\\STSRS-Control Center.txt",
+      "staging_path": "D:\\STUDY\\Security-Threats-in-Smart-Railway-Systems-STSRS--main\\data\\staging\\control_center.parquet",
+      "file_size_bytes": 1702463233,
+      "expected_header": [
+        "Timestamp",
+        "TrainID",
+        "SignalID",
+        "Speed",
+        "Distance",
+        "Location",
+        "SignalStatus",
+        "OverlapStatus",
+        "OverlapCount",
+        "PacketLoss",
+        "Latency",
+        "RenewalInterval",
+        "Burstiness",
+        "AttackInfo"
+      ],
+      "actual_header": [
+        "Timestamp",
+        "TrainID",
+        "SignalID",
+        "Speed",
+        "Distance",
+        "Location",
+        "SignalStatus",
+        "OverlapStatus",
+        "OverlapCount",
+        "PacketLoss",
+        "Latency",
+        "RenewalInterval",
+        "Burstiness",
+        "AttackInfo"
+      ],
+      "header_matches": true,
+      "row_count": 10000000,
+      "schema_passed": true,
+      "staging_written": true,
+      "failure_reasons": [],
+      "column_metrics": [
+        {
+          "name": "Timestamp",
+          "logical_type": "timestamp",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "TrainID",
+          "logical_type": "categorical",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "SignalID",
+          "logical_type": "categorical",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "Speed",
+          "logical_type": "numeric",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "Distance",
+          "logical_type": "numeric",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "Location",
+          "logical_type": "numeric",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "SignalStatus",
+          "logical_type": "categorical",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": 0
+        },
+        {
+          "name": "OverlapStatus",
+          "logical_type": "categorical",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": 0
+        },
+        {
+          "name": "OverlapCount",
+          "logical_type": "numeric",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "PacketLoss",
+          "logical_type": "numeric",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "Latency",
+          "logical_type": "numeric",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "RenewalInterval",
+          "logical_type": "numeric",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "Burstiness",
+          "logical_type": "numeric",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "AttackInfo",
+          "logical_type": "categorical",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        }
+      ]
+    },
+    {
+      "dataset_name": "train",
+      "source_name": "Train",
+      "raw_path": "D:\\STUDY\\Security-Threats-in-Smart-Railway-Systems-STSRS--main\\STSRS-Train.txt",
+      "staging_path": "D:\\STUDY\\Security-Threats-in-Smart-Railway-Systems-STSRS--main\\data\\staging\\train.parquet",
+      "file_size_bytes": 1719509441,
+      "expected_header": [
+        "Timestamp",
+        "TrainID",
+        "SignalID",
+        "Speed",
+        "Distance",
+        "Location",
+        "SignalStatus",
+        "OverlapStatus",
+        "OverlapCount",
+        "PacketLoss",
+        "Latency",
+        "RenewalInterval",
+        "Burstiness",
+        "AttackInfo"
+      ],
+      "actual_header": [
+        "Timestamp",
+        "TrainID",
+        "SignalID",
+        "Speed",
+        "Distance",
+        "Location",
+        "SignalStatus",
+        "OverlapStatus",
+        "OverlapCount",
+        "PacketLoss",
+        "Latency",
+        "RenewalInterval",
+        "Burstiness",
+        "AttackInfo"
+      ],
+      "header_matches": true,
+      "row_count": 10000000,
+      "schema_passed": true,
+      "staging_written": true,
+      "failure_reasons": [],
+      "column_metrics": [
+        {
+          "name": "Timestamp",
+          "logical_type": "timestamp",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "TrainID",
+          "logical_type": "categorical",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "SignalID",
+          "logical_type": "categorical",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "Speed",
+          "logical_type": "numeric",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "Distance",
+          "logical_type": "numeric",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "Location",
+          "logical_type": "numeric",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "SignalStatus",
+          "logical_type": "categorical",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": 0
+        },
+        {
+          "name": "OverlapStatus",
+          "logical_type": "categorical",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": 0
+        },
+        {
+          "name": "OverlapCount",
+          "logical_type": "numeric",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "PacketLoss",
+          "logical_type": "numeric",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "Latency",
+          "logical_type": "numeric",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "RenewalInterval",
+          "logical_type": "numeric",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "Burstiness",
+          "logical_type": "numeric",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        },
+        {
+          "name": "AttackInfo",
+          "logical_type": "categorical",
+          "nullable": false,
+          "non_null_rows": 10000000,
+          "parse_success_rows": 10000000,
+          "parse_success_rate": 1.0,
+          "unexpected_value_rows": null
+        }
+      ]
+    }
+  ]
+}

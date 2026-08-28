@@ -1,0 +1,174 @@
+{
+  "generated_at": "2026-07-27T09:35:41.931018+00:00",
+  "report_path": "E:\\ZL\\STSRS\\reports\\model_training\\baseline_training_report.md",
+  "result": {
+    "model_name": "sgd_logistic_baseline",
+    "model_path": "E:\\ZL\\STSRS\\models\\baseline\\sgd_logistic_baseline.pkl",
+    "config_path": "E:\\ZL\\STSRS\\configs\\modeling\\baseline_sgd.yaml",
+    "feature_manifest_path": "E:\\ZL\\STSRS\\metadata\\manifests\\feature_manifest.json",
+    "encoded_feature_manifest_path": "E:\\ZL\\STSRS\\metadata\\manifests\\encoded_feature_manifest.json",
+    "feature_columns": [
+      "Speed",
+      "Distance",
+      "Location",
+      "OverlapCount",
+      "PacketLoss",
+      "Latency",
+      "Burstiness",
+      "SignalStatus__is_Green",
+      "SignalStatus__is_Yellow",
+      "SignalStatus__is_Red",
+      "OverlapStatus__is_Yes",
+      "OverlapStatus__is_No"
+    ],
+    "target_column": "AttackLabel",
+    "target_id_column": "AttackLabelId",
+    "target_mapping": {
+      "Normal": 0,
+      "DoS": 1,
+      "Jamming": 2,
+      "ReplayAttack": 3
+    },
+    "training_rows": 6994527,
+    "epochs_completed": 1,
+    "selected_epoch": 1,
+    "primary_metric_name": "validation_macro_f1",
+    "split_evaluations": [
+      {
+        "split_name": "train",
+        "row_count": 6994527,
+        "accuracy": 0.47231085104110687,
+        "balanced_accuracy": 0.2147641102044892,
+        "macro_precision": 0.40296614518725105,
+        "macro_recall": 0.2147641102044892,
+        "macro_f1": 0.17867691959595297,
+        "weighted_f1": 0.39291928461528614,
+        "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\sgd_logistic_baseline_train_confusion_matrix.csv",
+        "class_metrics": [
+          {
+            "label": "Normal",
+            "label_id": 0,
+            "precision": 0.6115131580774291,
+            "recall": 0.858672344031683,
+            "f1": 0.7143172560187481,
+            "support": 3846855
+          },
+          {
+            "label": "DoS",
+            "label_id": 1,
+            "precision": 1.0,
+            "recall": 1.5249248974488007e-05,
+            "f1": 3.0498032876879443e-05,
+            "support": 1049232
+          },
+          {
+            "label": "Jamming",
+            "label_id": 2,
+            "precision": 0.00035142267157508184,
+            "recall": 0.0003688475372993498,
+            "f1": 0.0003599243321869076,
+            "support": 1049214
+          },
+          {
+            "label": "ReplayAttack",
+            "label_id": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1049226
+          }
+        ]
+      },
+      {
+        "split_name": "validation",
+        "row_count": 1498290,
+        "accuracy": 0.3980838155497267,
+        "balanced_accuracy": 0.19910971974346853,
+        "macro_precision": 0.392611701329189,
+        "macro_recall": 0.19910971974346853,
+        "macro_f1": 0.16619121447600788,
+        "weighted_f1": 0.3322517553317363,
+        "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\sgd_logistic_baseline_validation_confusion_matrix.csv",
+        "class_metrics": [
+          {
+            "label": "Normal",
+            "label_id": 0,
+            "precision": 0.5701065383821157,
+            "recall": 0.7960752641520769,
+            "f1": 0.6644031011033907,
+            "support": 749095
+          },
+          {
+            "label": "DoS",
+            "label_id": 1,
+            "precision": 1.0,
+            "recall": 6.676882296580435e-06,
+            "f1": 1.3353675432241783e-05,
+            "support": 299541
+          },
+          {
+            "label": "Jamming",
+            "label_id": 2,
+            "precision": 0.00034026693464012797,
+            "recall": 0.0003569379395006872,
+            "f1": 0.00034840312520859415,
+            "support": 299772
+          },
+          {
+            "label": "ReplayAttack",
+            "label_id": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 149882
+          }
+        ]
+      },
+      {
+        "split_name": "test",
+        "row_count": 1498591,
+        "accuracy": 0.5467248902469053,
+        "balanced_accuracy": 0.22792926882303086,
+        "macro_precision": 0.4115067889476225,
+        "macro_recall": 0.22792926882303086,
+        "macro_f1": 0.18905682634800774,
+        "weighted_f1": 0.4534445766014546,
+        "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\sgd_logistic_baseline_test_confusion_matrix.csv",
+        "class_metrics": [
+          {
+            "label": "Normal",
+            "label_id": 0,
+            "precision": 0.6456268100951593,
+            "recall": 0.9112834243038723,
+            "f1": 0.7557905360587547,
+            "support": 899009
+          },
+          {
+            "label": "DoS",
+            "label_id": 1,
+            "precision": 1.0,
+            "recall": 1.3342762218634503e-05,
+            "f1": 2.6685168383412502e-05,
+            "support": 149894
+          },
+          {
+            "label": "Jamming",
+            "label_id": 2,
+            "precision": 0.00040034569533057115,
+            "recall": 0.0004203082260324238,
+            "f1": 0.0004100841648928899,
+            "support": 149890
+          },
+          {
+            "label": "ReplayAttack",
+            "label_id": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 299798
+          }
+        ]
+      }
+    ]
+  }
+}

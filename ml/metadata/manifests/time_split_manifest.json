@@ -1,0 +1,45 @@
+{
+  "generated_at": "2026-07-27T09:08:45.859476+00:00",
+  "report_path": "E:\\ZL\\STSRS\\reports\\data_validation\\time_split_report.md",
+  "result": {
+    "input_dataset_path": "E:\\ZL\\STSRS\\data\\validated\\merged\\trusted_labeled_dataset.parquet",
+    "target_column": "AttackLabel",
+    "sort_by": [
+      "Timestamp",
+      "TrainID",
+      "SignalID"
+    ],
+    "total_input_rows": 9992612,
+    "purged_row_count": 1204,
+    "purge_gap_enabled": true,
+    "purge_gap_seconds": 300,
+    "train_boundary_timestamp": "2025-11-03 09:33:43",
+    "validation_boundary_timestamp": "2025-11-20 18:14:44",
+    "split_summaries": [
+      {
+        "split_name": "train",
+        "row_count": 6994527,
+        "row_ratio": 0.6999698377161047,
+        "min_timestamp": "2025-08-14 09:08:15",
+        "max_timestamp": "2025-11-03 09:28:42",
+        "output_path": "E:\\ZL\\STSRS\\data\\serving\\train\\train.parquet"
+      },
+      {
+        "split_name": "validation",
+        "row_count": 1498290,
+        "row_ratio": 0.14993977550614393,
+        "min_timestamp": "2025-11-03 09:38:45",
+        "max_timestamp": "2025-11-20 18:09:41",
+        "output_path": "E:\\ZL\\STSRS\\data\\serving\\validation\\validation.parquet"
+      },
+      {
+        "split_name": "test",
+        "row_count": 1498591,
+        "row_ratio": 0.14996989776046543,
+        "min_timestamp": "2025-11-20 18:19:46",
+        "max_timestamp": "2025-12-08 02:54:55",
+        "output_path": "E:\\ZL\\STSRS\\data\\serving\\test\\test.parquet"
+      }
+    ]
+  }
+}

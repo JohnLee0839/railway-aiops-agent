@@ -1,0 +1,88 @@
+{
+  "generated_at": "2026-07-27T10:35:45.618058+00:00",
+  "report_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_diagnostics_report.md",
+  "result": {
+    "model_name": "v1_hist_gradient_boosting",
+    "model_path": "E:\\ZL\\STSRS\\models\\baseline\\v1_hist_gradient_boosting.pkl",
+    "validation_sample_rows": 100000,
+    "permutation_repeats": 5,
+    "primary_scoring": "f1_macro",
+    "permutation_importance_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_permutation_importance.csv",
+    "leakage_check_path": "E:\\ZL\\STSRS\\reports\\model_training\\v1_split_leakage_checks.csv",
+    "top_permutation_importances": [
+      {
+        "feature_name": "Distance",
+        "mean_importance": 0.6419942921003143,
+        "std_importance": 0.0005603917632860882
+      },
+      {
+        "feature_name": "PacketLoss",
+        "mean_importance": 0.3426948477888338,
+        "std_importance": 0.0007112370082728099
+      },
+      {
+        "feature_name": "Latency",
+        "mean_importance": 0.018369834108121475,
+        "std_importance": 0.0002842549400384342
+      },
+      {
+        "feature_name": "Speed",
+        "mean_importance": 0.0004779716304973869,
+        "std_importance": 5.036034084054196e-05
+      },
+      {
+        "feature_name": "Burstiness",
+        "mean_importance": 3.6007891040612526e-05,
+        "std_importance": 1.019956561693142e-05
+      },
+      {
+        "feature_name": "SignalStatus__is_Green",
+        "mean_importance": 0.0,
+        "std_importance": 0.0
+      },
+      {
+        "feature_name": "SignalStatus__is_Yellow",
+        "mean_importance": 0.0,
+        "std_importance": 0.0
+      },
+      {
+        "feature_name": "SignalStatus__is_Red",
+        "mean_importance": 0.0,
+        "std_importance": 0.0
+      },
+      {
+        "feature_name": "OverlapStatus__is_Yes",
+        "mean_importance": 0.0,
+        "std_importance": 0.0
+      },
+      {
+        "feature_name": "OverlapStatus__is_No",
+        "mean_importance": 0.0,
+        "std_importance": 0.0
+      }
+    ],
+    "leakage_pair_metrics": [
+      {
+        "left_split": "train",
+        "right_split": "validation",
+        "exact_row_overlap_count": 0,
+        "feature_only_overlap_count": 0,
+        "conflicting_feature_overlap_count": 0
+      },
+      {
+        "left_split": "train",
+        "right_split": "test",
+        "exact_row_overlap_count": 0,
+        "feature_only_overlap_count": 0,
+        "conflicting_feature_overlap_count": 0
+      },
+      {
+        "left_split": "validation",
+        "right_split": "test",
+        "exact_row_overlap_count": 0,
+        "feature_only_overlap_count": 0,
+        "conflicting_feature_overlap_count": 0
+      }
+    ]
+  }
+}

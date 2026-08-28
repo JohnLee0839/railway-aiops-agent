@@ -1,0 +1,112 @@
+dataset_name: stsrs
+version: 1
+
+file_format:
+  delimiter: ","
+  header: true
+  encoding: utf-8
+  line_terminator: auto
+
+key_definition:
+  columns:
+    - Timestamp
+    - TrainID
+    - SignalID
+  uniqueness_required: true
+  nulls_allowed: false
+
+timestamp:
+  column: Timestamp
+  format: "%d-%b-%Y %H:%M:%S"
+  timezone: null
+
+columns:
+  - name: Timestamp
+    logical_type: timestamp
+    physical_type: string
+    nullable: false
+    role: key
+  - name: TrainID
+    logical_type: categorical
+    physical_type: string
+    nullable: false
+    role: key
+  - name: SignalID
+    logical_type: categorical
+    physical_type: string
+    nullable: false
+    role: key
+  - name: Speed
+    logical_type: numeric
+    physical_type: float64
+    nullable: false
+    role: feature
+  - name: Distance
+    logical_type: numeric
+    physical_type: float64
+    nullable: false
+    role: feature
+  - name: Location
+    logical_type: numeric
+    physical_type: float64
+    nullable: false
+    role: feature
+  - name: SignalStatus
+    logical_type: categorical
+    physical_type: string
+    nullable: false
+    role: feature
+    allowed_values:
+      - Green
+      - Yellow
+      - Red
+  - name: OverlapStatus
+    logical_type: categorical
+    physical_type: string
+    nullable: false
+    role: feature
+    allowed_values:
+      - "Yes"
+      - "No"
+  - name: OverlapCount
+    logical_type: numeric
+    physical_type: int64
+    nullable: false
+    role: feature
+  - name: PacketLoss
+    logical_type: numeric
+    physical_type: float64
+    nullable: false
+    role: feature
+  - name: Latency
+    logical_type: numeric
+    physical_type: float64
+    nullable: false
+    role: feature
+  - name: RenewalInterval
+    logical_type: numeric
+    physical_type: int64
+    nullable: false
+    role: source_specific_feature
+  - name: Burstiness
+    logical_type: numeric
+    physical_type: float64
+    nullable: false
+    role: feature
+  - name: AttackInfo
+    logical_type: categorical
+    physical_type: string
+    nullable: false
+    role: raw_label
+
+source_specific_semantics:
+  control_center:
+    RenewalInterval: TTL_or_hop_count
+  train:
+    RenewalInterval: key_renewal_interval
+
+staging_output:
+  format: parquet
+  partitioning: none
+  preserve_raw_label: true
+  preserve_source_name: true

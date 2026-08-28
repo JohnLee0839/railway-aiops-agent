@@ -1,0 +1,190 @@
+{
+  "generated_at": "2026-07-27T11:10:51.724186+00:00",
+  "report_path": "E:\\ZL\\STSRS\\reports\\model_training\\v2_compact_tree_report.md",
+  "result": {
+    "model_name": "v2_compact_top3_hist_gradient_boosting",
+    "model_path": "E:\\ZL\\STSRS\\models\\baseline\\v2_compact_top3_hist_gradient_boosting.pkl",
+    "config_path": "E:\\ZL\\STSRS\\configs\\modeling\\v2_compact_top3_hist_gradient_boosting.yaml",
+    "parent_experiment": "v1_hist_gradient_boosting",
+    "promoted_ablation_variant": "top3_only",
+    "reference_model_manifest_path": "E:\\ZL\\STSRS\\metadata\\manifests\\v1_tree_baseline_manifest.json",
+    "reference_ablation_manifest_path": "E:\\ZL\\STSRS\\metadata\\manifests\\v1_ablation_manifest.json",
+    "reference_model_path": "E:\\ZL\\STSRS\\models\\baseline\\v1_hist_gradient_boosting.pkl",
+    "reference_feature_count": 12,
+    "reference_model_size_bytes": 1115209,
+    "feature_columns": [
+      "Distance",
+      "PacketLoss",
+      "Latency"
+    ],
+    "sample_hash_columns": [
+      "Speed",
+      "Distance",
+      "Location",
+      "OverlapCount",
+      "PacketLoss",
+      "Latency",
+      "Burstiness",
+      "SignalStatus__is_Green",
+      "SignalStatus__is_Yellow",
+      "SignalStatus__is_Red",
+      "OverlapStatus__is_Yes",
+      "OverlapStatus__is_No"
+    ],
+    "target_column": "AttackLabel",
+    "target_id_column": "AttackLabelId",
+    "target_mapping": {
+      "Normal": 0,
+      "DoS": 1,
+      "Jamming": 2,
+      "ReplayAttack": 3
+    },
+    "full_training_rows": 6994527,
+    "sampled_training_rows": 800000,
+    "sample_per_class": 200000,
+    "feature_count": 3,
+    "feature_reduction_count": 9,
+    "feature_reduction_ratio": 0.75,
+    "model_size_bytes": 1055664,
+    "validation_macro_f1_delta_vs_v1": -0.00039450513101124685,
+    "test_macro_f1_delta_vs_v1": -0.0002850352132768297,
+    "primary_metric_name": "validation_macro_f1",
+    "split_evaluations": [
+      {
+        "split_name": "train",
+        "row_count": 6994527,
+        "accuracy": 0.9989428877749703,
+        "balanced_accuracy": 0.9994373409798245,
+        "macro_precision": 0.9983239812365323,
+        "macro_recall": 0.9994373409798245,
+        "macro_f1": 0.9988796232842378,
+        "weighted_f1": 0.9989430299276616,
+        "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v2_compact_top3_hist_gradient_boosting_train_confusion_matrix.csv",
+        "class_metrics": [
+          {
+            "label": "Normal",
+            "label_id": 0,
+            "precision": 0.9998765756459794,
+            "recall": 0.9982011279343775,
+            "f1": 0.9990381493337552,
+            "support": 3846855
+          },
+          {
+            "label": "DoS",
+            "label_id": 1,
+            "precision": 0.9973497242306311,
+            "recall": 0.9999485337847112,
+            "f1": 0.9986474382709293,
+            "support": 1049232
+          },
+          {
+            "label": "Jamming",
+            "label_id": 2,
+            "precision": 0.9973672025124247,
+            "recall": 0.9997617263970935,
+            "f1": 0.9985630289578937,
+            "support": 1049214
+          },
+          {
+            "label": "ReplayAttack",
+            "label_id": 3,
+            "precision": 0.9987024225570938,
+            "recall": 0.9998379758031158,
+            "f1": 0.9992698765743733,
+            "support": 1049226
+          }
+        ]
+      },
+      {
+        "split_name": "validation",
+        "row_count": 1498290,
+        "accuracy": 0.9986711517796956,
+        "balanced_accuracy": 0.9992479656473753,
+        "macro_precision": 0.9982544059410977,
+        "macro_recall": 0.9992479656473753,
+        "macro_f1": 0.9987499521249175,
+        "weighted_f1": 0.9986711945906881,
+        "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v2_compact_top3_hist_gradient_boosting_validation_confusion_matrix.csv",
+        "class_metrics": [
+          {
+            "label": "Normal",
+            "label_id": 0,
+            "precision": 0.9998126799610374,
+            "recall": 0.9975290183488076,
+            "f1": 0.9986695436421091,
+            "support": 749095
+          },
+          {
+            "label": "DoS",
+            "label_id": 1,
+            "precision": 0.9971601123969583,
+            "recall": 0.9998998467655513,
+            "f1": 0.9985281002825448,
+            "support": 299541
+          },
+          {
+            "label": "Jamming",
+            "label_id": 2,
+            "precision": 0.997311067552772,
+            "recall": 0.9997031076951817,
+            "f1": 0.9985056550212158,
+            "support": 299772
+          },
+          {
+            "label": "ReplayAttack",
+            "label_id": 3,
+            "precision": 0.9987337638536231,
+            "recall": 0.9998598897799602,
+            "f1": 0.9992965095538004,
+            "support": 149882
+          }
+        ]
+      },
+      {
+        "split_name": "test",
+        "row_count": 1498591,
+        "accuracy": 0.9990978192181856,
+        "balanced_accuracy": 0.999515358034912,
+        "macro_precision": 0.9982918647309091,
+        "macro_recall": 0.999515358034912,
+        "macro_f1": 0.9989026613118872,
+        "weighted_f1": 0.9990979909747895,
+        "confusion_matrix_path": "E:\\ZL\\STSRS\\reports\\model_training\\v2_compact_top3_hist_gradient_boosting_test_confusion_matrix.csv",
+        "class_metrics": [
+          {
+            "label": "Normal",
+            "label_id": 0,
+            "precision": 0.9998541071076567,
+            "recall": 0.9986418378458948,
+            "f1": 0.9992476048010827,
+            "support": 899009
+          },
+          {
+            "label": "DoS",
+            "label_id": 1,
+            "precision": 0.997205607414455,
+            "recall": 0.9999132720455789,
+            "f1": 0.9985576042239211,
+            "support": 149894
+          },
+          {
+            "label": "Jamming",
+            "label_id": 2,
+            "precision": 0.9975503900737546,
+            "recall": 0.9997998532256989,
+            "f1": 0.9986738549503862,
+            "support": 149890
+          },
+          {
+            "label": "ReplayAttack",
+            "label_id": 3,
+            "precision": 0.9985573543277704,
+            "recall": 0.9997064690224752,
+            "f1": 0.9991315812721585,
+            "support": 299798
+          }
+        ]
+      }
+    ]
+  }
+}
