@@ -1,0 +1,2 @@
+Timestamp,TrainID,SignalID,Speed,Distance,Location,SignalStatus,OverlapStatus,OverlapCount,PacketLoss,Latency,RenewalInterval,Burstiness,AttackInfo
+14-Aug-2025 09:08:15,7Y36,YT919,40.9625919555509,14.7493899260853,0.0147493899260853,Green,No,0,95.229611319183,354.459051775989,0,4.80443236666682,Attack/DoS/DoS
