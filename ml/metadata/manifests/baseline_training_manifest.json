@@ -3,7 +3,7 @@
   "report_path": "E:\\ZL\\STSRS\\reports\\model_training\\baseline_training_report.md",
   "result": {
     "model_name": "sgd_logistic_baseline",
-    "model_path": "E:\\ZL\\STSRS\\models\\baseline\\sgd_logistic_baseline.pkl",
+    "model_path": "models/baseline/sgd_logistic_baseline.pkl",
     "config_path": "E:\\ZL\\STSRS\\configs\\modeling\\baseline_sgd.yaml",
     "feature_manifest_path": "E:\\ZL\\STSRS\\metadata\\manifests\\feature_manifest.json",
     "encoded_feature_manifest_path": "E:\\ZL\\STSRS\\metadata\\manifests\\encoded_feature_manifest.json",

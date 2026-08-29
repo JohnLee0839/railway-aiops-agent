@@ -3,7 +3,7 @@
   "report_path": "E:\\ZL\\STSRS\\reports\\model_training\\v2_compact_tree_report.md",
   "result": {
     "model_name": "v2_compact_top3_hist_gradient_boosting",
-    "model_path": "E:\\ZL\\STSRS\\models\\baseline\\v2_compact_top3_hist_gradient_boosting.pkl",
+    "model_path": "models/baseline/v2_compact_top3_hist_gradient_boosting.pkl",
     "config_path": "E:\\ZL\\STSRS\\configs\\modeling\\v2_compact_top3_hist_gradient_boosting.yaml",
     "parent_experiment": "v1_hist_gradient_boosting",
     "promoted_ablation_variant": "top3_only",

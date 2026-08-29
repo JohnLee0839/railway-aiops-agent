@@ -69,6 +69,14 @@ volumes/
 uploads/
 *.tmp
 
+# ML generated datasets, reports, logs, and transient pipeline outputs
+ml/data/*
+!ml/data/**/.gitkeep
+ml/reports/*
+!ml/reports/**/.gitkeep
+ml/logs/*
+!ml/logs/**/.gitkeep
+
 # OS
 .DS_Store
 Thumbs.db

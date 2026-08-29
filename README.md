@@ -238,7 +238,33 @@ curl -N -X POST "http://localhost:9900/api/aiops/stsrs?session_id=demo" \
 | `MCP_CLS_URL` | `http://localhost:8003/mcp` | CLS MCP 服务地址 |
 | `MCP_MONITOR_URL` | `http://localhost:8004/mcp` | Monitor MCP 服务地址 |
 | `PROMETHEUS_BASE_URL` | `http://127.0.0.1:9090` | Prometheus 地址 |
-| `ML_ATTACK_DETECTOR_BACKEND` | `rule` | 攻击检测后端：`zl`、`rule` 或 `mock` |
+| `ML_ATTACK_DETECTOR_BACKEND` | `zl` | 攻击检测后端：`zl`、`rule` 或 `mock` |
+
+### ML 模型与训练流水线
+
+仓库已包含可用于在线推理的 V0/V1/V2 模型文件和对应 manifest。应用默认使用 `V2` 精简模型，输入特征为 `Distance`、`PacketLoss` 和 `Latency`；模型加载失败时默认回退到规则检测器。
+
+安装训练流水线依赖：
+
+```bash
+uv pip install -e ".[ml]"
+```
+
+ML 源码位于 `ml/src/stsrs_data_engineering/`，可通过 CLI 依次执行数据校验、对齐、特征工程、训练和评估：
+
+```bash
+python ml/scripts/run_schema_validation.py
+python ml/scripts/run_key_audit.py
+python ml/scripts/run_alignment_audit.py
+python ml/scripts/run_field_consistency_audit.py
+python ml/scripts/run_label_quality_audit.py
+python ml/scripts/run_time_split.py
+python ml/scripts/run_feature_engineering.py
+python ml/scripts/run_encoded_features.py
+python ml/scripts/run_v2_compact_tree.py
+```
+
+原始 STSRS 数据集及训练过程产生的 Parquet、报告和日志不随仓库发布。运行训练流水线前，需要按照 `ml/configs/` 中的 schema 和质量规则准备数据；在线服务只依赖 `ml/models/` 与 `ml/metadata/manifests/` 中的模型产物。
 
 不要将 `.env`、API Key、日志、上传文件或 Milvus 数据目录提交到 Git 仓库；这些路径已在 `.gitignore` 中排除。
 

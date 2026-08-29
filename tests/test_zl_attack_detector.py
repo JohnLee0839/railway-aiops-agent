@@ -415,18 +415,17 @@ def test_real_zl_v2_pickle_smoke_if_environment_available():
     pytest.importorskip("numpy")
     pytest.importorskip("sklearn")
 
-    model_path = "D:/STUDY/ZL/models/baseline/v2_compact_top3_hist_gradient_boosting.pkl"
-    pytest.importorskip("pathlib")
-
     from pathlib import Path
 
-    if not Path(model_path).exists():
-        pytest.skip("ZL V2 model artifact is not available on this machine")
+    repository_root = Path(__file__).resolve().parents[1]
+    model_path = repository_root / "ml" / "models" / "baseline" / (
+        "v2_compact_top3_hist_gradient_boosting.pkl"
+    )
 
     from app.ml.zl_attack_detector import ZLAttackDetector
 
     detector = ZLAttackDetector(
-        project_root="D:/STUDY/ZL",
+        project_root=repository_root / "ml",
         model_version="V2",
         model_path=model_path,
     )
