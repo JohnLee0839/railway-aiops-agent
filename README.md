@@ -324,12 +324,6 @@ uv run pytest
 └── start-windows.bat     # Windows 一键启动脚本
 ```
 
-## 文档
-
-- [`docs/`](docs/)：项目架构、运行流程和入门说明。
-- [`aiops-docs/`](aiops-docs/)：用于 RAG 检索的运维知识库示例。
-- [`CHANGELOG_AIOPS.md`](CHANGELOG_AIOPS.md)：AIOps 相关变更记录。
-- [`铁路智能运维系统源码详解.md`](铁路智能运维系统源码详解.md)：源码结构和实现说明。
 
 ## 免责声明
 
