@@ -1,419 +1,312 @@
-# SuperBizAgent
+# RailwayOps Agent
 
-> 企业级智能对话和运维助手，支持 RAG 知识库问答和 AIOps 智能诊断
+基于大语言模型、RAG 和事件驱动工作流的铁路智能运维系统。
 
-[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-green.svg)](https://fastapi.tiangolo.com/)
-[![LangChain](https://img.shields.io/badge/LangChain-latest-orange.svg)](https://www.langchain.com/)
+系统面向铁路信号与运行安全场景，提供知识库问答、日志与监控信息分析、原始指标诊断、事件分级、处置编排和结果验证等能力，并通过 Web 界面和 FastAPI 接口提供服务。
 
-## ✨ 核心特性
+[![Python](https://img.shields.io/badge/Python-3.11--3.13-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.109%2B-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-workflow-1C3C3C)](https://langchain-ai.github.io/langgraph/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-- 🤖 **智能对话** - LangChain 多轮对话 + 流式输出
-- 📚 **RAG 问答** - 向量检索增强，支持文档上传、自动建立向量索引、自动更新知识库
-- 🔧 **AIOps 诊断** - 事件驱动运维诊断，内置 Plan-Execute-Replan 恢复策略
-- 🌐 **Web 界面** - 现代化 UI，支持多种对话模式：快速问答/流式对话
-- 🔌 **MCP 集成** - 日志查询和监控数据工具接入
+## 项目特性
 
-## 🛠️ 技术栈
+- **铁路智能问答**：基于 LangChain/LangGraph 实现多轮对话、知识检索和流式回答。
+- **RAG 知识库**：支持上传 TXT/Markdown 文档，自动切分、向量化并写入 Milvus。
+- **事件驱动 AIOps**：将告警或原始监测指标统一为事件，完成归一化、去重、分级和诊断。
+- **自动化处置流程**：通过 Triage、Runbook、Action、Verify 和 Replan 协作完成分析与恢复。
+- **STSRS 场景支持**：面向铁路信号安全系统提供专用指标和告警接入入口。
+- **MCP 工具集成**：通过 MCP 接入日志查询、服务信息、CPU/内存指标和历史工单工具。
+- **可观测的处理过程**：AIOps 通过 SSE 返回诊断阶段、工具调用、状态变化和最终报告。
+- **Web 操作界面**：提供对话、知识库上传和智能运维分析入口。
 
-- **框架**: FastAPI + LangChain + LangGraph
-- **LLM**: 阿里云 DashScope (通义千问)
-- **向量库**: Milvus
-- **工具协议**: MCP (Model Context Protocol)
+## 系统架构
 
-## 🚀 快速开始
+```mermaid
+flowchart LR
+    UI[Web UI] --> API[FastAPI API]
+    API --> RAG[RAG Agent]
+    API --> OPS[AIOps Service]
+    RAG --> EMB[DashScope Embedding]
+    EMB --> MILVUS[(Milvus)]
+    OPS --> NORMALIZER[Event Normalizer]
+    NORMALIZER --> SEVERITY[Severity Engine]
+    SEVERITY --> AGENTS[Triage / Runbook / Action / Verify]
+    AGENTS --> RECOVERY[Replanner / Recovery FSM]
+    RAG --> MCP[MCP Client]
+    OPS --> MCP
+    MCP --> CLS[CLS MCP Server]
+    MCP --> MONITOR[Monitor MCP Server]
+```
+
+## 技术栈
+
+| 模块 | 技术 |
+| --- | --- |
+| API 与 Web 服务 | FastAPI、Uvicorn、SSE-Starlette |
+| Agent 与工作流 | LangChain、LangGraph、FastMCP |
+| 大语言模型 | 阿里云 DashScope OpenAI 兼容接口 |
+| 向量检索 | Milvus、PyMilvus、LangChain Milvus |
+| 数据与诊断 | Prometheus 兼容指标、规则/模型攻击检测器 |
+| 前端 | HTML、CSS、原生 JavaScript |
+| 工程工具 | uv、pytest、Ruff、Black、MyPy |
+
+## 快速开始
 
 ### 环境要求
-- Python 3.10+
-- 阿里云 DashScope API Key ([获取地址](https://dashscope.aliyun.com/))
 
-### 安装和启动
+- Python `3.11`、`3.12` 或 `3.13`
+- Docker Desktop 和 Docker Compose
+- DashScope API Key
+- Windows 用户可直接使用仓库中的 `start-windows.bat`
 
-#### Linux/macOS 环境
+### 1. 获取代码并安装依赖
 
 ```bash
-# 1. 克隆项目
-git clone <repository_url>
-cd super_biz_agent_py
+git clone https://github.com/<your-account>/<your-repository>.git
+cd railways_V.2
 
-# 2. 安装依赖（推荐使用 uv）
-# 方式 1: 使用 uv（推荐，更快）
-pip install uv
+# 推荐使用 uv
 uv venv
-source .venv/bin/activate
+source .venv/bin/activate       # Windows: .venv\Scripts\activate
 uv pip install -e .
-
-# 方式 2: 使用 pip
-pip install -e .
-
-# 3. 创建本地配置文件
-cp .env.example .env
-# 编辑 .env，填入你的 DASHSCOPE_API_KEY
-vim .env  # 或使用其他编辑器
-
-# 4. 一键初始化（启动 Docker + 服务 + 上传文档）
-make init
-
-# 5. 一键启动
-make start
 ```
 
-#### Windows 环境（PowerShell/CMD）
-
-如果Windows 不支持 `make` 命令，可以手动执行以下步骤以启动服务：
-
-```powershell
-# 1. 克隆项目
-git clone <repository_url>
-cd super_biz_agent_py
-
-# 2. 创建虚拟环境并安装依赖
-# 方式 1: 使用 uv（推荐，更快）
-pip install uv
-# 创建虚拟环境
-uv venv
-# 激活虚拟环境
-.venv\Scripts\activate
-# 安装所有依赖
-uv pip install -e .
-
-# 方式 2: 使用 pip
-python -m venv .venv
-.venv\Scripts\activate
-pip install -e .
-
-# 3. 编辑配置文件
-# 创建并编辑本地配置文件，填入你的 DASHSCOPE_API_KEY
-Copy-Item .env.example .env
-notepad .env
-
-# 4. 启动 Docker Desktop
-# 确保 Docker Desktop 已安装并正在运行
-
-# 5. 启动 Milvus 向量数据库（Docker Compose）
-docker compose -f vector-database.yml up -d
-
-# 6. 等待 Milvus 启动完成（约 5-10 秒）
-timeout /t 10
-
-# 7. 启动 MCP 服务
-# 启动 CLS 日志查询服务（新开一个 PowerShell 窗口）
-python mcp_servers/cls_server.py
-
-# 启动 Monitor 监控服务（新开一个 PowerShell 窗口）
-python mcp_servers/monitor_server.py
-
-# 8. 启动 FastAPI 主服务（新开一个 PowerShell 窗口）
-# 注意：日志会自动输出到 logs\app_YYYY-MM-DD.log
-python -m uvicorn app.main:app --host 0.0.0.0 --port 9900
-
-# 9. 上传文档到向量库（新开一个 PowerShell 窗口）
-# 等待服务启动完成后执行
-timeout /t 5
-python -c "import requests, os, time; [requests.post('http://localhost:9900/api/upload', files={'file': open(f'aiops-docs/{f}', 'rb')}) or time.sleep(1) for f in os.listdir('aiops-docs') if f.endswith('.md')]"
-```
-
-**Windows 一键启动脚本**（推荐）
-
-使用启动脚本：
-
-```powershell
-# 启动所有服务
-.\start-windows.bat
-
-# 停止所有服务
-.\stop-windows.bat
-```
-
-### 访问服务
-- **Web 界面**: http://localhost:9900
-- **API 文档**: http://localhost:9900/docs
-
-## 📡 API 接口
-
-### 核心接口
-
-| 功能 | 方法 | 路径 | 说明 |
-|------|------|------|------|
-| 普通对话 | POST | `/api/chat` | 一次性返回 |
-| 流式对话 | POST | `/api/chat_stream` | SSE 流式输出 |
-| AIOps 事件处理 | POST | `/api/aiops/incident` | 事件驱动诊断与恢复（流式） |
-| 文件上传 | POST | `/api/upload` | 上传并索引文档 |
-| 健康检查 | GET | `/api/health` | 服务状态检查 |
-
-### 使用示例
+开发环境可额外安装测试和代码检查依赖：
 
 ```bash
-# 普通对话
-curl -X POST "http://localhost:9900/api/chat" \
-  -H "Content-Type: application/json" \
-  -d '{"Id":"session-123","Question":"你好"}'
-
-# 流式对话
-curl -X POST "http://localhost:9900/api/chat_stream" \
-  -H "Content-Type: application/json" \
-  -d '{"Id":"session-123","Question":"你好"}' \
-  --no-buffer
-
-# AIOps 事件处理
-curl -X POST "http://localhost:9900/api/aiops/incident?session_id=session-123" \
-  -H "Content-Type: application/json" \
-  -d '{"source":"manual","raw_event":{"description":"检测到可疑事件","train_id":"Train-1H66"}}' \
-  --no-buffer
+uv pip install -e ".[dev]"
 ```
 
-## 📁 项目结构
+也可以使用 `python -m venv .venv` 创建虚拟环境，再执行 `pip install -e .`。
 
-```
-super_biz_agent_py/
-├── app/                                    # 应用核心
-│   ├── __init__.py                         # 包初始化（自动加载日志配置）
-│   ├── main.py                             # FastAPI 应用入口
-│   ├── config.py                           # 配置管理（环境变量、MCP 服务器配置）
-│   ├── api/                                # API 路由层
-│   │   ├── __init__.py
-│   │   ├── chat.py                         # 对话接口（RAG 聊天）
-│   │   ├── aiops.py                        # AIOps 接口（故障诊断）
-│   │   ├── file.py                         # 文件管理（文档上传）
-│   │   └── health.py                       # 健康检查（服务状态）
-│   ├── services/                           # 业务服务层
-│   │   ├── __init__.py
-│   │   ├── rag_agent_service.py            # RAG Agent（LangGraph 状态图）
-│   │   ├── aiops_service.py                # AIOps 服务（计划-执行-重规划）
-│   │   ├── vector_store_manager.py         # 向量存储管理器
-│   │   ├── vector_embedding_service.py     # 向量embedding服务
-│   │   ├── vector_index_service.py         # 向量索引服务
-│   │   ├── vector_search_service.py        # 向量检索服务
-│   │   └── document_splitter_service.py    # 文档分割服务
-│   ├── agent/                              # Agent 模块
-│   │   ├── __init__.py
-│   │   ├── mcp_client.py                   # MCP 客户端（工具调用）
-│   │   └── aiops/                          # AIOps 核心逻辑
-│   │       ├── __init__.py
-│   │       ├── planner.py                  # 计划制定器
-│   │       ├── executor.py                 # 步骤执行器
-│   │       ├── replanner.py                # 重规划器
-│   │       ├── state.py                    # 状态定义
-│   │       └── utils.py                    # 工具函数
-│   ├── models/                             # 数据模型层
-│   │   ├── __init__.py
-│   │   ├── aiops.py                        # AIOps 模型
-│   │   ├── document.py                     # 文档模型
-│   │   ├── request.py                      # 请求模型
-│   │   └── response.py                     # 响应模型
-│   ├── tools/                              # Agent 工具集
-│   │   ├── __init__.py
-│   │   ├── knowledge_tool.py               # 知识库查询工具
-│   │   └── time_tool.py                    # 时间工具
-│   ├── core/                               # 核心组件
-│   │   ├── __init__.py
-│   │   ├── llm_factory.py                  # LLM 工厂（模型管理）
-│   │   └── milvus_client.py                # Milvus 客户端
-│   └── utils/                              # 工具类
-│       ├── __init__.py
-│       └── logger.py                       # 日志配置（Loguru）
-├── static/                                 # Web 前端（纯静态）
-│   ├── index.html                          # 主页面
-│   ├── app.js                              # 前端逻辑
-│   └── styles.css                          # 样式表
-├── mcp_servers/                            # MCP 服务器
-│   ├── cls_server.py                       # CLS 日志查询服务
-│   ├── monitor_server.py                   # 监控数据服务
-│   └── README.md                           # MCP 服务说明
-├── aiops-docs/                             # 运维知识库（Markdown 文档）
-├── logs/                                   # 日志目录（Loguru 自动创建）
-│   └── app_YYYY-MM-DD.log                  # 按天轮转的日志文件
-├── uploads/                                # 上传文件临时目录
-├── volumes/                                # Milvus 数据持久化目录
-├── .env.example                            # 环境变量模板
-├── .env                                    # 本地环境变量配置（不提交）
-├── Makefile                                # 项目管理命令（Linux/macOS）
-├── start-windows.bat                       # Windows 启动脚本
-├── stop-windows.bat                        # Windows 停止脚本
-├── vector-database.yml                     # Milvus Docker Compose 配置
-├── pyproject.toml                          # 项目配置（依赖、元数据）
-├── uv.lock                                 # uv 依赖锁定文件
-├── pyrightconfig.json                      # Pyright 类型检查配置
-└── README.md                               # 项目说明
-```
-
-## ⚙️ 配置说明
-
-从模板创建本地配置文件：`cp .env.example .env`（Windows PowerShell：`Copy-Item .env.example .env`）。随后通过 `.env` 文件配置：
+### 2. 创建配置文件
 
 ```bash
-# 阿里云LLM DashScope 配置（必填）
-# 秘钥管理： https://bailian.console.aliyun.com/cn-beijing/?spm=5176.29597918.J_SEsSjsNv72yRuRFS2VknO.2.61ac133ccTVQLw&tab=demohouse#/api-key
-DASHSCOPE_API_KEY=your-api-key （配置你自己的秘钥）
-DASHSCOPE_API_BASE=https://dashscope.aliyuncs.com/compatible-mode/v1  # 不配置则默认会使用新加坡站点
+cp .env.example .env            # Windows PowerShell: Copy-Item .env.example .env
+```
+
+至少需要在 `.env` 中设置：
+
+```dotenv
+DASHSCOPE_API_KEY=你的 DashScope API Key
 DASHSCOPE_MODEL=qwen-max
-
-# Milvus 配置
-MILVUS_HOST=localhost
-MILVUS_PORT=19530
-
-# RAG 配置
-RAG_TOP_K=3
-CHUNK_MAX_SIZE=800
-CHUNK_OVERLAP=100
+DASHSCOPE_EMBEDDING_MODEL=text-embedding-v4
 ```
 
-## 🎯 AIOps 智能运维
-
-基于 **Incident Workflow + Recovery FSM** 实现自动运维诊断与恢复。
-
-### 核心特性
-- ✅ 事件归一化、去重、分级
-- ✅ Triage / Runbook / Action / Verify 流水线
-- ✅ Recovery FSM 内部调用 Plan-Execute-Replan
-- ✅ 流式输出诊断过程
-- ✅ 生成结构化报告
-
-### 快速测试
+### 3. 启动 Milvus
 
 ```bash
-# 服务已通过 make init 自动启动
-# 如需重启服务：make restart
-
-# 访问 Web 界面，点击"智能运维与诊断工具"
-# 或使用 API
-curl -X POST "http://localhost:9900/api/aiops/incident?session_id=test" \
-  -H "Content-Type: application/json" \
-  -d '{"source":"manual","raw_event":{"description":"测试事件"}}' \
-  --no-buffer
+docker compose -f vector-database.yml up -d
 ```
 
-### 诊断流程
-```
-1. Incident 进入 Normalize / Deduplicate / Severity
-2. TriageAgent 完成诊断，RunbookAgent 生成处置计划
-3. ActionOrchestrator 执行动作，Verifier 校验结果
-4. 失败时进入 Recovery FSM，内部触发 Plan-Execute-Replan
-```
+该 Compose 配置会启动 Milvus Standalone、etcd、MinIO 和 Attu：
 
-## 📝 开发指南
+- Milvus：`localhost:19530`
+- Milvus 健康检查：`http://localhost:9091/healthz`
+- Attu 管理界面：`http://localhost:8000`
 
-### 常用命令
+### 4. 启动应用
+
+Linux/macOS 可分别启动两个 MCP 服务和主服务：
 
 ```bash
-# 项目管理
-make init              # 一键初始化（Docker + 服务 + 文档）
-make start             # 启动所有服务
-make stop              # 停止所有服务
-make restart           # 重启所有服务
-
-# 依赖管理
-make install-dev       # 安装开发依赖
-make sync              # 同步依赖
-
-# Docker 管理
-make up                # 启动 Docker 容器
-make down              # 停止 Docker 容器
-
-# 代码质量
-make format            # 格式化代码
-make lint              # 代码检查
+python mcp_servers/cls_server.py
+python mcp_servers/monitor_server.py
+python -m uvicorn app.main:app --host 0.0.0.0 --port 9900
 ```
 
+Windows 推荐使用一键脚本：
 
-## 🐛 常见问题
-
-### Windows 环境问题
-
-#### 1. `make` 命令不可用
-Windows 不支持 `make` 命令，请使用提供的批处理脚本：
 ```powershell
-# 启动服务
 .\start-windows.bat
+```
 
-# 停止服务
+停止 Windows 服务：
+
+```powershell
 .\stop-windows.bat
 ```
 
-#### 2. PowerShell 执行策略限制
-如果遇到 "无法加载文件，因为在此系统上禁止运行脚本" 错误：
-```powershell
-# 临时允许脚本执行（管理员权限）
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+启动成功后访问：
 
-# 或者使用 CMD 而不是 PowerShell
-cmd
-.\start-windows.bat
-```
+- Web 界面：<http://localhost:9900>
+- Swagger API 文档：<http://localhost:9900/docs>
+- ReDoc：<http://localhost:9900/redoc>
+- 健康检查：<http://localhost:9900/health>
 
-#### 3. 端口被占用（Windows）
-```powershell
-# 查看占用端口的进程
-netstat -ano | findstr :9900
+### 5. 导入知识库文档
 
-# 结束进程（替换 PID 为实际进程 ID）
-taskkill /F /PID <PID>
-```
+上传接口支持 `.txt` 和 `.md` 文件，单个文件最大 `10 MB`：
 
-### 通用问题
-
-### API Key 错误
 ```bash
-# 检查环境变量
-cat .env | grep DASHSCOPE_API_KEY    # Linux/macOS
-type .env | findstr DASHSCOPE_API_KEY  # Windows
+curl -X POST http://localhost:9900/api/upload \
+  -F "file=@aiops-docs/cpu_high_usage.md"
 ```
 
-### Milvus 连接失败
+也可以批量索引目录：
+
 ```bash
-# 确保本机有 Docker 服务并且已经启动（可以使用 Docker Desktop）
-
-# 检查 Milvus 状态
-docker ps | grep milvus
-
-# 重启 Milvus（使用 docker compose）
-docker compose -f vector-database.yml restart
-
-# 或者重启单个服务
-docker compose -f vector-database.yml restart standalone
+curl -X POST "http://localhost:9900/api/index_directory?directory_path=aiops-docs"
 ```
 
-### 服务无法启动
+## API 概览
 
-**Linux/macOS:**
+所有接口均由 FastAPI 自动生成完整请求参数和响应示例，建议优先参考 <http://localhost:9900/docs>。
+
+### 对话与知识库
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| `POST` | `/api/chat` | 普通对话，一次性返回结果 |
+| `POST` | `/api/chat_stream` | SSE 流式对话 |
+| `POST` | `/api/chat/clear` | 清空指定会话历史 |
+| `GET` | `/api/chat/session/{session_id}` | 查询会话历史 |
+| `POST` | `/api/upload` | 上传并建立文档向量索引 |
+| `POST` | `/api/index_directory` | 批量索引目录中的文档 |
+
+普通对话示例：
+
 ```bash
-# 查看服务日志
-tail -f logs/app_$(date +%Y-%m-%d).log  # FastAPI 主服务（Loguru 日志）
-tail -f mcp_cls.log                      # CLS MCP 服务
-tail -f mcp_monitor.log                  # Monitor MCP 服务
-
-# 检查端口占用
-lsof -i :9900  # FastAPI
-lsof -i :8003  # CLS MCP
-lsof -i :8004  # Monitor MCP
+curl -X POST http://localhost:9900/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"Id":"session-001","Question":"如何排查铁路信号异常？"}'
 ```
 
-**Windows:**
-```powershell
-# 查看服务日志（获取今天的日期）
-$today = Get-Date -Format "yyyy-MM-dd"
-type logs\app_$today.log  # FastAPI 主服务（Loguru 日志）
-type mcp_cls.log          # CLS MCP 服务
-type mcp_monitor.log      # Monitor MCP 服务
+### AIOps 与事件诊断
 
-# 或者查看最新的日志文件
-Get-ChildItem logs\*.log | Sort-Object LastWriteTime -Descending | Select-Object -First 1 | Get-Content -Tail 50
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| `POST` | `/api/aiops/incident` | 通用事件驱动诊断，SSE 返回 |
+| `POST` | `/api/aiops/stsrs` | STSRS 告警专用入口，SSE 返回 |
+| `POST` | `/api/aiops/metrics` | 原始监测指标诊断，SSE 返回 |
+| `GET` | `/api/aiops/sse/{thread_id}` | 订阅事件处理过程 |
+| `GET` | `/api/aiops/incidents` | 查询事件列表，可按状态过滤 |
+| `GET` | `/api/aiops/incidents/{incident_id}` | 查询事件详情 |
+| `GET` | `/api/aiops/incidents/{incident_id}/timeline` | 查询事件时间线 |
+| `GET` | `/api/aiops/stats` | 查询 AIOps 统计信息 |
 
-# 检查端口占用
-netstat -ano | findstr :9900  # FastAPI
-netstat -ano | findstr :8003  # CLS MCP
-netstat -ano | findstr :8004  # Monitor MCP
+原始指标诊断示例：
+
+```bash
+curl -N -X POST "http://localhost:9900/api/aiops/metrics?session_id=demo" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "train_id": "T001",
+    "signal_id": "S001",
+    "timestamp": "2026-01-01T12:00:00",
+    "metrics": {
+      "speed": 120.0,
+      "packet_loss": 0.35,
+      "latency": 250.0,
+      "signal_status": "RED",
+      "overlap_status": "NORMAL"
+    }
+  }'
 ```
 
-## 📚 参考资源
+STSRS 告警示例：
 
-- [FastAPI 文档](https://fastapi.tiangolo.com/)
-- [LangChain 文档](https://python.langchain.com/)
-- [LangGraph Plan-Execute](https://langchain-ai.github.io/langgraph/tutorials/plan-and-execute/)
-- [阿里云 DashScope](https://dashscope.aliyun.com/)
-- [MCP 协议](https://modelcontextprotocol.io/)
+```bash
+curl -N -X POST "http://localhost:9900/api/aiops/stsrs?session_id=demo" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "attack_code": "STSRS-1003",
+    "description": "检测到 Replay Attack",
+    "train_id": "Train-1H66",
+    "signal_id": "Signal-YT546",
+    "control_center": "ControlCenter-A",
+    "region": "North-3",
+    "line": "L5"
+  }'
+```
 
-## 📄 许可证
-author： chief
+## 配置说明
 
-MIT License
+`.env.example` 包含完整配置模板。常用配置如下：
+
+| 配置项 | 示例值 | 说明 |
+| --- | --- | --- |
+| `DASHSCOPE_API_KEY` | 无 | DashScope API Key，必填 |
+| `DASHSCOPE_MODEL` | `qwen-max` | 对话模型 |
+| `DASHSCOPE_EMBEDDING_MODEL` | `text-embedding-v4` | 文档向量模型 |
+| `MILVUS_HOST` | `localhost` | Milvus 地址 |
+| `MILVUS_PORT` | `19530` | Milvus 端口 |
+| `RAG_TOP_K` | `3` | 每次检索返回的文档片段数 |
+| `CHUNK_MAX_SIZE` | `800` | 文档分块大小 |
+| `CHUNK_OVERLAP` | `100` | 文档分块重叠长度 |
+| `MCP_CLS_URL` | `http://localhost:8003/mcp` | CLS MCP 服务地址 |
+| `MCP_MONITOR_URL` | `http://localhost:8004/mcp` | Monitor MCP 服务地址 |
+| `PROMETHEUS_BASE_URL` | `http://127.0.0.1:9090` | Prometheus 地址 |
+| `ML_ATTACK_DETECTOR_BACKEND` | `rule` | 攻击检测后端：`zl`、`rule` 或 `mock` |
+
+不要将 `.env`、API Key、日志、上传文件或 Milvus 数据目录提交到 Git 仓库；这些路径已在 `.gitignore` 中排除。
+
+## MCP 服务
+
+`mcp_servers/` 提供两个本地 FastMCP 服务，默认使用 Streamable HTTP：
+
+- `cls_server.py`：日志搜索、服务日志查询、日志模式分析。
+- `monitor_server.py`：CPU/内存指标、进程列表、服务信息和历史工单查询。
+
+当前服务中的部分数据和处置动作用于本地演示与测试，接入生产环境时需要替换为真实的 CLS、监控平台和运维执行接口。详细说明见 [`mcp_servers/README.md`](mcp_servers/README.md)。
+
+## 开发与测试
+
+常用 Make 目标（Linux/macOS）：
+
+```bash
+make install-dev   # 安装开发依赖
+make start         # 启动 MCP 和 FastAPI 服务
+make stop          # 停止服务
+make format        # 格式化代码
+make lint          # 运行 Ruff 检查
+make test          # 运行测试
+make check-all     # 运行完整检查
+```
+
+直接运行测试：
+
+```bash
+uv run pytest
+```
+
+测试覆盖攻击检测器、STSRS 数据融合、事件处理相关核心逻辑。运行测试后会生成 `htmlcov/` 覆盖率报告，该目录不会被提交。
+
+## 项目结构
+
+```text
+.
+├── app/
+│   ├── api/              # FastAPI 路由
+│   ├── agents/           # Triage、Runbook、Action、Verify Agent
+│   ├── agent/aiops/      # Plan-Execute-Replan Agent
+│   ├── core/             # Milvus、事件存储、审计、状态机
+│   ├── events/           # 事件归一化、去重、分级和超时管理
+│   ├── ml/               # 攻击检测与特征提取
+│   ├── models/           # Pydantic 数据模型
+│   ├── services/         # RAG、向量索引和 AIOps 服务
+│   └── tools/            # 本地工具与模拟动作
+├── static/               # Web 前端
+├── mcp_servers/          # CLS 和 Monitor MCP 服务
+├── aiops-docs/           # 示例运维知识库文档
+├── tests/                # 自动化测试
+├── vector-database.yml   # Milvus Docker Compose 配置
+├── Makefile              # Linux/macOS 管理命令
+└── start-windows.bat     # Windows 一键启动脚本
+```
+
+## 文档
+
+- [`docs/`](docs/)：项目架构、运行流程和入门说明。
+- [`aiops-docs/`](aiops-docs/)：用于 RAG 检索的运维知识库示例。
+- [`CHANGELOG_AIOPS.md`](CHANGELOG_AIOPS.md)：AIOps 相关变更记录。
+- [`铁路智能运维系统源码详解.md`](铁路智能运维系统源码详解.md)：源码结构和实现说明。
+
+## 免责声明
+
+本项目主要用于技术研究、架构验证和演示。仓库中的模拟监控数据、模拟处置动作和规则检测器不应直接用于真实铁路生产环境。接入生产系统前，请完成权限控制、数据脱敏、人工审批、审计、故障隔离和充分的安全验证。
+
+## 许可证
+
+本项目采用 [MIT License](LICENSE)。
