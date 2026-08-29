@@ -4,6 +4,8 @@
 
 系统面向铁路信号与运行安全场景，提供知识库问答、日志与监控信息分析、原始指标诊断、事件分级、处置编排和结果验证等能力，并通过 Web 界面和 FastAPI 接口提供服务。
 
+当前仓库是主应用与 STSRS ML 项目的合并版本：主应用负责 RAG 对话和事件驱动 AIOps，`ml/` 负责铁路通信网络攻击检测的数据工程、模型训练、评估和模型产物管理。
+
 [![Python](https://img.shields.io/badge/Python-3.11--3.13-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109%2B-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-workflow-1C3C3C)](https://langchain-ai.github.io/langgraph/)
@@ -63,19 +65,19 @@ flowchart LR
 ### 1. 获取代码并安装依赖
 
 ```bash
-git clone https://github.com/<your-account>/<your-repository>.git
-cd railways_V.2
+git clone https://github.com/JohnLee0839/railway-aiops-agent.git
+cd railway-aiops-agent
 
 # 推荐使用 uv
 uv venv
 source .venv/bin/activate       # Windows: .venv\Scripts\activate
-uv pip install -e .
+uv pip install -e ".[ml,dev]"
 ```
 
-开发环境可额外安装测试和代码检查依赖：
+仅运行主应用时，也可以只安装生产依赖：
 
 ```bash
-uv pip install -e ".[dev]"
+uv pip install -e .
 ```
 
 也可以使用 `python -m venv .venv` 创建虚拟环境，再执行 `pip install -e .`。
@@ -264,7 +266,7 @@ python ml/scripts/run_encoded_features.py
 python ml/scripts/run_v2_compact_tree.py
 ```
 
-原始 STSRS 数据集及训练过程产生的 Parquet、报告和日志不随仓库发布。运行训练流水线前，需要按照 `ml/configs/` 中的 schema 和质量规则准备数据；在线服务只依赖 `ml/models/` 与 `ml/metadata/manifests/` 中的模型产物。
+原始 STSRS 数据集及训练过程产生的 Parquet、报告和日志不随仓库发布。运行训练流水线前，需要按照 `ml/configs/` 中的 schema 和质量规则准备数据；在线服务默认直接使用仓库内 `ml/models/` 与 `ml/metadata/manifests/` 中的 V2 模型产物。
 
 不要将 `.env`、API Key、日志、上传文件或 Milvus 数据目录提交到 Git 仓库；这些路径已在 `.gitignore` 中排除。
 
