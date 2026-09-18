@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 9900
 
+    # Durable Incident persistence. PostgreSQL is required when the AIOps
+    # Incident pipeline is used; there is intentionally no SQLite fallback.
+    database_url: str = ""
+
     # DashScope 配置
     dashscope_api_key: str = ""  # 默认空字符串，实际使用需从环境变量加载
     dashscope_model: str = "qwen-max"

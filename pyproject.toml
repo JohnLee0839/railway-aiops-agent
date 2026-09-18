@@ -32,6 +32,8 @@ dependencies = [
     "langchain-qwq>=0.3.4",
     "numpy>=2.3.0,<3.0.0",
     "scikit-learn>=1.8.0,<2.0.0",
+    "SQLAlchemy>=2.0,<3.0",
+    "psycopg[binary]>=3.2,<4.0",
 ]
 
 [project.optional-dependencies]
@@ -61,6 +63,11 @@ build-backend = "setuptools.build_meta"
 [[tool.uv.index]]
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 default = true
+
+[tool.uv]
+# The optional shap dependency already requires Python 3.12+. Limit lock
+# resolution accordingly while preserving the project's declared metadata.
+environments = ["python_full_version >= '3.12'"]
 
 [tool.setuptools.packages.find]
 where = ["."]

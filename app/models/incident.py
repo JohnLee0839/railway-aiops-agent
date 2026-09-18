@@ -3,10 +3,13 @@
 Incident, State, Event, KnowledgeBase 等核心 Pydantic 模型
 """
 
+from __future__ import annotations
+
+import hashlib
 from enum import Enum
 from typing import Optional, List, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 import uuid
 
 
@@ -123,6 +126,20 @@ class ApprovalAction(str, Enum):
     STOP_TRAIN = "STOP_TRAIN"
     BLOCK_SECTION = "BLOCK_SECTION"
     EMERGENCY_SHUTDOWN = "EMERGENCY_SHUTDOWN"
+    RESTART_GATEWAY = "restart_gateway"
+    BLOCK_SUSPICIOUS_SOURCE = "block_suspicious_source"
+
+
+class MockActionName(str, Enum):
+    """当前可由 ActionOrchestrator 执行的 Mock 工具名称。"""
+    SWITCH_BACKUP_LINK = "switch_backup_link"
+    RESTART_GATEWAY = "restart_gateway"
+    BLOCK_SUSPICIOUS_SOURCE = "block_suspicious_source"
+    NOTIFY_DISPATCHER = "notify_dispatcher"
+    GENERATE_TICKET = "generate_ticket"
+    VERIFY_NETWORK_HEALTH = "verify_network_health"
+    ROLLBACK_SWITCH_BACKUP_LINK = "rollback_switch_backup_link"
+    ROLLBACK_BLOCK_SUSPICIOUS_SOURCE = "rollback_block_suspicious_source"
 
 
 # ============================================================
@@ -220,6 +237,9 @@ class IncidentRecord(BaseModel):
     # 处理结果
     triage_result: Optional[Dict[str, Any]] = None
     plan: Optional[List[str]] = None
+    # 完整计划用于 durable store 重新构建可执行的 RunbookPlan；plan 保留给
+    # 现有展示/API 调用方使用。
+    runbook_plan: Optional["RunbookPlan"] = None
     execution_results: List[Dict[str, Any]] = Field(default_factory=list)
     verification_result: Optional[Dict[str, Any]] = None
     # 状态历史
@@ -287,12 +307,32 @@ class RawIncidentRequest(BaseModel):
     raw_event: Dict[str, Any] = Field(default_factory=dict)
 
 
+class ActionInstruction(BaseModel):
+    """一条已规范化、可直接传给工具注册表的动作指令。"""
+    # These IDs name the logical plan step and action. They are deliberately
+    # independent from a plan's display order and are persisted with the plan.
+    step_id: str = Field(default_factory=lambda: f"step-{uuid.uuid4().hex}")
+    action_id: str = Field(default_factory=lambda: f"action-{uuid.uuid4().hex}")
+    idempotency_key: Optional[str] = None
+    action: MockActionName = Field(description="工具注册表中的动作名称")
+    arguments: Dict[str, Any] = Field(default_factory=dict, description="工具调用参数")
+    description: str = Field(default="", description="面向操作者和审计的说明")
+
+
 class RunbookPlan(BaseModel):
     """RunbookAgent 输出（含决策可解释性）"""
     plan_id: str = Field(
         default_factory=lambda: f"plan-{uuid.uuid4().hex[:8]}"
     )
-    steps: List[str] = Field(description="处置步骤列表")
+    plan_revision: int = Field(
+        default=1,
+        ge=1,
+        description="同一逻辑计划的持久化版本；Phase 2 首版固定为 1",
+    )
+    actions: List[ActionInstruction] = Field(
+        min_length=1,
+        description="按执行顺序排列的结构化动作指令",
+    )
     source_kb: str = Field(
         default="CaseKB",
         description="知识来源: CaseKB / RunbookKB / TopologyKB"
@@ -315,10 +355,45 @@ class RunbookPlan(BaseModel):
     estimated_duration_minutes: int = 30
     requires_approval: bool = False
     approval_actions: List[ApprovalAction] = Field(default_factory=list)
-    rollback_steps: List[str] = Field(
+    rollback_actions: List[ActionInstruction] = Field(
         default_factory=list,
-        description="回滚步骤"
+        description="按执行顺序排列的结构化回滚动作指令",
     )
+
+    def bind_execution_identities(self, incident_id: str) -> None:
+        """Bind incident-scoped idempotency keys once without changing logical IDs."""
+        for instruction in [*self.actions, *self.rollback_actions]:
+            if not instruction.step_id:
+                instruction.step_id = f"step-{uuid.uuid4().hex}"
+            if not instruction.action_id:
+                instruction.action_id = f"action-{uuid.uuid4().hex}"
+            if instruction.idempotency_key:
+                continue
+            material = "\x1f".join(
+                (
+                    incident_id,
+                    self.plan_id,
+                    str(self.plan_revision),
+                    instruction.step_id,
+                    instruction.action_id,
+                )
+            )
+            instruction.idempotency_key = f"idem-{hashlib.sha256(material.encode()).hexdigest()}"
+
+    @computed_field(return_type=List[str])
+    @property
+    def steps(self) -> List[str]:
+        """兼容展示和审计：执行输入始终以 actions 为准。"""
+        return [instruction.description or instruction.action.value for instruction in self.actions]
+
+    @computed_field(return_type=List[str])
+    @property
+    def rollback_steps(self) -> List[str]:
+        """兼容展示和审计：执行输入始终以 rollback_actions 为准。"""
+        return [
+            instruction.description or instruction.action.value
+            for instruction in self.rollback_actions
+        ]
 
 
 # ============================================================
@@ -332,7 +407,14 @@ class MockActionResult(BaseModel):
     message: str = ""
     duration_ms: float = 0.0
     error_type: Optional[str] = None  # "timeout" / "failure" / "exception" / "escalated" / "circuit_open"
+    # 下游执行结局：not_sent / response_lost / unknown / failed / success
+    outcome: Optional[str] = None
     retry_count: int = 0
+    retry_exhausted: bool = False
+    retryable: Optional[bool] = None
+    side_effect_possible: bool = False
+    side_effect_confirmed: bool = False
+    target: Optional[str] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
@@ -355,19 +437,183 @@ class ApprovalRequest(BaseModel):
     escalated_at: Optional[datetime] = None
 
 
+class ExecutionOutcome(str, Enum):
+    """副作用动作的执行结局，和升级/重试处置解耦。"""
+    SUCCESS = "success"
+    FAILED = "failed"
+    NOT_SENT = "not_sent"
+    RESPONSE_LOST = "response_lost"
+    UNKNOWN = "unknown"
+
+
+class ActionJournalStatus(str, Enum):
+    """Durable lifecycle state for a logical action, distinct from its outcome."""
+    STARTED = "STARTED"
+    TERMINAL = "TERMINAL"
+
+
+class ExternalStateStatus(str, Enum):
+    """Read-only observation of the external system during recovery."""
+    APPLIED = "applied"
+    NOT_APPLIED = "not_applied"
+    UNKNOWN = "unknown"
+    UNAVAILABLE = "unavailable"
+
+
+class ReconciliationDecision(str, Enum):
+    """Recovery decision derived from an external-state observation."""
+    APPLIED = "applied"
+    NOT_APPLIED = "not_applied"
+    UNCERTAIN = "uncertain"
+    NOT_RECONCILABLE = "not_reconcilable"
+
+
+class WorkflowCursorStatus(str, Enum):
+    """Durable position state for an existing RunbookPlan revision."""
+    NOT_STARTED = "not_started"
+    EXECUTING = "executing"
+    WAITING_RECOVERY = "waiting_recovery"
+    COMPLETED = "completed"
+    BLOCKED = "blocked"
+
+
+class ExternalStateObservation(BaseModel):
+    """Evidence returned by a read-only external-state probe."""
+    status: ExternalStateStatus
+    observed_at: datetime = Field(default_factory=datetime.utcnow)
+    source: str
+    target: Optional[str] = None
+    evidence: Dict[str, Any] = Field(default_factory=dict)
+    reason: Optional[str] = None
+
+
+class RecoveryCandidate(BaseModel):
+    """Durable non-terminal action context used by Phase 4 recovery."""
+    incident_id: str
+    plan_id: str
+    plan_revision: int
+    step_id: str
+    action_id: str
+    idempotency_key: str
+    action_name: str
+    target: Optional[str] = None
+    journal_status: ActionJournalStatus
+    latest_attempt_no: Optional[int] = None
+    latest_attempt_status: Optional[ActionJournalStatus] = None
+    latest_outcome: Optional[ExecutionOutcome] = None
+    side_effect_possible: bool = False
+    retry_exhausted: bool = False
+    request_metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class WorkflowCursor(BaseModel):
+    incident_id: str
+    plan_id: str
+    plan_revision: int
+    current_step_id: Optional[str] = None
+    current_action_id: Optional[str] = None
+    cursor_status: WorkflowCursorStatus
+    updated_at: datetime
+
+
+class RecoveryLease(BaseModel):
+    action_id: str
+    owner_id: str
+    lease_token: str
+    acquired_at: datetime
+    expires_at: datetime
+
+
+class ReconciliationResult(BaseModel):
+    decision: ReconciliationDecision
+    observation: ExternalStateObservation
+
+
+class ActionAttemptRecord(BaseModel):
+    attempt_id: str
+    action_id: str
+    attempt_no: int
+    status: ActionJournalStatus
+    started_at: datetime
+    finished_at: Optional[datetime] = None
+    outcome: Optional[ExecutionOutcome] = None
+    success: Optional[bool] = None
+    retryable: Optional[bool] = None
+    retry_exhausted: bool = False
+    side_effect_possible: bool = False
+    error_type: Optional[str] = None
+    error_message: Optional[str] = None
+    request_metadata: Dict[str, Any] = Field(default_factory=dict)
+    response_metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class ActionJournalRecord(BaseModel):
+    action_id: str
+    incident_id: str
+    plan_id: str
+    plan_revision: int
+    step_id: str
+    idempotency_key: str
+    action_name: str
+    target: Optional[str] = None
+    journal_status: ActionJournalStatus
+    outcome: Optional[ExecutionOutcome] = None
+    current_attempt: int = 0
+    retryable: Optional[bool] = None
+    retry_exhausted: bool = False
+    side_effect_possible: bool = False
+    error_type: Optional[str] = None
+    error_message: Optional[str] = None
+    started_at: datetime
+    finished_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+    request_metadata: Dict[str, Any] = Field(default_factory=dict)
+    response_metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class RecoveryResult(BaseModel):
+    action_id: str
+    decision: ReconciliationDecision
+    observation: ExternalStateObservation
+    action_executed: bool = False
+    journal: ActionJournalRecord
+
+
 class ExecutionResult(BaseModel):
     """
     TimeoutManager 执行结果（可序列化）。
 
     替代原来的 dataclass，确保审计可记录。
     """
+    action_name: Optional[str] = None
+    target: Optional[str] = None
     success: bool
     result: Optional[Any] = None
     error: Optional[str] = None  # 错误消息（不可序列化异常，存字符串）
+    error_type: Optional[str] = None
+    error_message: Optional[str] = None
     retry_count: int = 0
     total_duration_ms: float = 0.0
     escalated: bool = False
     final_action: str = ""  # "success" / "escalate" / "timeout" / "circuit_open"
+    outcome: ExecutionOutcome = ExecutionOutcome.UNKNOWN
+    retry_exhausted: bool = False
+    retryable: bool = False
+    side_effect_possible: bool = False
+    side_effect_confirmed: bool = False
+
+
+class StateVerificationResult(BaseModel):
+    """一次只读状态探针的观测结果。"""
+    verified: bool
+    target: Optional[str] = None
+    expected_state: Optional[Any] = None
+    observed_state: Optional[Any] = None
+    verifier_name: Optional[str] = None
+    checked_at: datetime = Field(default_factory=datetime.utcnow)
+    evidence: List[str] = Field(default_factory=list)
+    error_type: Optional[str] = None
 
 
 # ============================================================
@@ -487,12 +733,29 @@ class KBQueryResult(BaseModel):
 
 class RetryPolicy(BaseModel):
     """重试策略"""
-    max_retries: int = 3
+    max_retries: int = Field(default=3, ge=0)
     base_delay_seconds: float = 1.0
     backoff_multiplier: float = 2.0
     max_delay_seconds: float = 60.0
     retryable_exceptions: List[str] = Field(
         default_factory=lambda: ["TimeoutError", "ConnectionError", "MockFailure"]
+    )
+    retryable_status_codes: List[int] = Field(
+        default_factory=lambda: [408, 429, 500, 502, 503, 504]
+    )
+    non_retryable_exceptions: List[str] = Field(
+        default_factory=lambda: [
+            "PermissionDenied",
+            "PermissionDeniedError",
+            "InvalidParameter",
+            "InvalidParameterError",
+            "BadRequest",
+            "BadRequestError",
+            "ValidationError",
+        ]
+    )
+    non_retryable_status_codes: List[int] = Field(
+        default_factory=lambda: [400, 401, 403, 404, 405, 409, 422]
     )
 
 

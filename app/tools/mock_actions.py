@@ -13,11 +13,12 @@ Mock 运维动作工具 — 所有运维动作 Mock 实现
 import random
 import time
 import uuid
-from typing import Optional, Dict, Any
+from typing import Callable, Optional, Dict, Any
 from dataclasses import dataclass, field
 from enum import Enum
+from threading import Lock
 
-from app.models.incident import MockActionResult
+from app.models.incident import MockActionResult, RetryPolicy
 
 
 # ============================================================
@@ -30,6 +31,35 @@ class FailureMode(str, Enum):
     FAILURE = "failure"        # 返回失败
     TIMEOUT = "timeout"        # 模拟超时
     EXCEPTION = "exception"    # 抛出异常
+
+
+class ActionRisk(str, Enum):
+    """动作对运营系统的风险级别。"""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
+
+@dataclass(frozen=True)
+class ActionMetadata:
+    """由注册表统一管理的动作执行与治理策略。"""
+    timeout_seconds: float
+    retry_policy: RetryPolicy
+    risk: ActionRisk
+    requires_approval: bool = False
+    rollback_action: Optional[str] = None
+    idempotent: bool = False
+    # 状态探针是独立的只读 callable；预期状态由本次动作参数确定。
+    state_verifier: Optional[Callable[[str], Dict[str, Any]]] = None
+    expected_state: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None
+    verifier_timeout_seconds: float = 3.0
+
+
+@dataclass(frozen=True)
+class RegisteredAction:
+    """一个可执行动作及其不可分离的治理元数据。"""
+    handler: Callable[..., MockActionResult]
+    metadata: ActionMetadata
 
 
 @dataclass
@@ -118,6 +148,59 @@ ACTION_CONFIGS: Dict[str, MockActionConfig] = {
 
 
 # ============================================================
+# Mock 运行状态与只读状态探针
+# ============================================================
+
+_STATE_LOCK = Lock()
+_MOCK_OPERATIONAL_STATE: Dict[str, Dict[str, Any]] = {
+    "links": {},
+    "gateways": {},
+    "blocked_sources": {},
+}
+
+
+def _target(value: str) -> str:
+    return value or "default"
+
+
+def reset_mock_operational_state() -> None:
+    """仅供测试和本地 Mock 场景重置运行状态。"""
+    with _STATE_LOCK:
+        for state in _MOCK_OPERATIONAL_STATE.values():
+            state.clear()
+
+
+def query_device_link_state(target: str) -> Dict[str, Any]:
+    """只读查询指定设备当前激活的链路。"""
+    with _STATE_LOCK:
+        return {"link": _MOCK_OPERATIONAL_STATE["links"].get(_target(target), "primary")}
+
+
+def query_gateway_health(target: str) -> Dict[str, Any]:
+    """只读查询网关健康状态。"""
+    with _STATE_LOCK:
+        return {"health": _MOCK_OPERATIONAL_STATE["gateways"].get(_target(target), "unhealthy")}
+
+
+def query_source_block_state(target: str) -> Dict[str, Any]:
+    """只读查询来源 IP 的封禁状态。"""
+    with _STATE_LOCK:
+        return {"blocked": _MOCK_OPERATIONAL_STATE["blocked_sources"].get(_target(target), False)}
+
+
+def expected_backup_link(_: Dict[str, Any]) -> Dict[str, Any]:
+    return {"link": "backup"}
+
+
+def expected_healthy_gateway(_: Dict[str, Any]) -> Dict[str, Any]:
+    return {"health": "healthy"}
+
+
+def expected_blocked_source(_: Dict[str, Any]) -> Dict[str, Any]:
+    return {"blocked": True}
+
+
+# ============================================================
 # Mock 动作实现
 # ============================================================
 
@@ -188,7 +271,14 @@ def switch_backup_link(
 
     副作用：改变链路状态（需 rollback_switch_backup_link 回滚）
     """
-    return _simulate_execution("switch_backup_link")
+    result = _simulate_execution("switch_backup_link")
+    device = _target(target or source)
+    result.target = device
+    if result.success:
+        with _STATE_LOCK:
+            _MOCK_OPERATIONAL_STATE["links"][device] = "backup"
+        result.side_effect_possible = True
+    return result
 
 
 def restart_gateway(
@@ -201,7 +291,14 @@ def restart_gateway(
 
     副作用：短暂断连（无回滚——重启不可逆）
     """
-    return _simulate_execution("restart_gateway")
+    result = _simulate_execution("restart_gateway")
+    target = _target(gateway_id or kwargs.get("target", ""))
+    result.target = target
+    if result.success:
+        with _STATE_LOCK:
+            _MOCK_OPERATIONAL_STATE["gateways"][target] = "healthy"
+        result.side_effect_possible = True
+    return result
 
 
 def block_suspicious_source(
@@ -215,7 +312,14 @@ def block_suspicious_source(
 
     副作用：IP 被封禁（需 rollback_block_suspicious_source 回滚）
     """
-    return _simulate_execution("block_suspicious_source")
+    result = _simulate_execution("block_suspicious_source")
+    target = _target(source_ip)
+    result.target = target
+    if result.success:
+        with _STATE_LOCK:
+            _MOCK_OPERATIONAL_STATE["blocked_sources"][target] = True
+        result.side_effect_possible = True
+    return result
 
 
 def notify_dispatcher(
@@ -275,7 +379,14 @@ def rollback_switch_backup_link(
 
     恢复原始链路配置。
     """
-    return _simulate_execution("rollback_switch_backup_link")
+    result = _simulate_execution("rollback_switch_backup_link")
+    device = _target(original_target or original_source)
+    result.target = device
+    if result.success:
+        with _STATE_LOCK:
+            _MOCK_OPERATIONAL_STATE["links"][device] = "primary"
+        result.side_effect_possible = True
+    return result
 
 
 def rollback_block_suspicious_source(
@@ -288,64 +399,159 @@ def rollback_block_suspicious_source(
 
     恢复被封禁的 IP。
     """
-    return _simulate_execution("rollback_block_suspicious_source")
+    result = _simulate_execution("rollback_block_suspicious_source")
+    target = _target(source_ip)
+    result.target = target
+    if result.success:
+        with _STATE_LOCK:
+            _MOCK_OPERATIONAL_STATE["blocked_sources"][target] = False
+        result.side_effect_possible = True
+    return result
 
 
 # ============================================================
 # 动作注册表（用于 ActionOrchestrator 查找）
 # ============================================================
 
-# 基础动作 → 回滚动作映射
+# 每个注册项同时定义工具、超时、重试、风险和回滚关系。
+# 重试状态码仅包含可恢复的请求/服务错误，4xx 参数错误不会重试。
+ACTION_REGISTRY: Dict[str, RegisteredAction] = {
+    "switch_backup_link": RegisteredAction(
+        handler=switch_backup_link,
+        metadata=ActionMetadata(
+            timeout_seconds=12.0,
+            retry_policy=RetryPolicy(max_retries=1, base_delay_seconds=1.0),
+            risk=ActionRisk.MEDIUM,
+            rollback_action="rollback_switch_backup_link",
+            state_verifier=query_device_link_state,
+            expected_state=expected_backup_link,
+        ),
+    ),
+    "restart_gateway": RegisteredAction(
+        handler=restart_gateway,
+        metadata=ActionMetadata(
+            timeout_seconds=30.0,
+            retry_policy=RetryPolicy(
+                max_retries=1,
+                base_delay_seconds=2.0,
+                retryable_status_codes=[408, 429, 502, 503, 504],
+            ),
+            risk=ActionRisk.HIGH,
+            requires_approval=True,
+            state_verifier=query_gateway_health,
+            expected_state=expected_healthy_gateway,
+        ),
+    ),
+    "block_suspicious_source": RegisteredAction(
+        handler=block_suspicious_source,
+        metadata=ActionMetadata(
+            timeout_seconds=8.0,
+            retry_policy=RetryPolicy(max_retries=1, base_delay_seconds=1.0),
+            risk=ActionRisk.HIGH,
+            requires_approval=True,
+            rollback_action="rollback_block_suspicious_source",
+            state_verifier=query_source_block_state,
+            expected_state=expected_blocked_source,
+        ),
+    ),
+    "notify_dispatcher": RegisteredAction(
+        handler=notify_dispatcher,
+        metadata=ActionMetadata(
+            timeout_seconds=5.0,
+            retry_policy=RetryPolicy(max_retries=3, base_delay_seconds=0.5),
+            risk=ActionRisk.LOW,
+            idempotent=True,
+        ),
+    ),
+    "generate_ticket": RegisteredAction(
+        handler=generate_ticket,
+        metadata=ActionMetadata(
+            timeout_seconds=5.0,
+            retry_policy=RetryPolicy(max_retries=1, base_delay_seconds=1.0),
+            risk=ActionRisk.LOW,
+        ),
+    ),
+    "verify_network_health": RegisteredAction(
+        handler=verify_network_health,
+        metadata=ActionMetadata(
+            timeout_seconds=10.0,
+            retry_policy=RetryPolicy(max_retries=2, base_delay_seconds=0.5),
+            risk=ActionRisk.LOW,
+            idempotent=True,
+        ),
+    ),
+    "rollback_switch_backup_link": RegisteredAction(
+        handler=rollback_switch_backup_link,
+        metadata=ActionMetadata(
+            timeout_seconds=10.0,
+            retry_policy=RetryPolicy(max_retries=1, base_delay_seconds=1.0),
+            risk=ActionRisk.MEDIUM,
+            idempotent=True,
+        ),
+    ),
+    "rollback_block_suspicious_source": RegisteredAction(
+        handler=rollback_block_suspicious_source,
+        metadata=ActionMetadata(
+            timeout_seconds=6.0,
+            retry_policy=RetryPolicy(max_retries=2, base_delay_seconds=0.5),
+            risk=ActionRisk.MEDIUM,
+            idempotent=True,
+        ),
+    ),
+}
+
+# 兼容现有调用方；新增代码应通过 get_registered_action 读取元数据。
+ALL_MOCK_ACTIONS: Dict[str, Callable[..., MockActionResult]] = {
+    name: registration.handler for name, registration in ACTION_REGISTRY.items()
+}
 ROLLBACK_MAP: Dict[str, str] = {
-    "switch_backup_link": "rollback_switch_backup_link",
-    "block_suspicious_source": "rollback_block_suspicious_source",
-    # restart_gateway 无回滚（不可逆）
-    # notify_dispatcher 无回滚（无副作用）
-    # generate_ticket 无回滚（工单可关闭）
-    # verify_network_health 无回滚（只读）
+    name: registration.metadata.rollback_action
+    for name, registration in ACTION_REGISTRY.items()
+    if registration.metadata.rollback_action
 }
-
-# 所有可用动作
-ALL_MOCK_ACTIONS: Dict[str, callable] = {
-    "switch_backup_link": switch_backup_link,
-    "restart_gateway": restart_gateway,
-    "block_suspicious_source": block_suspicious_source,
-    "notify_dispatcher": notify_dispatcher,
-    "generate_ticket": generate_ticket,
-    "verify_network_health": verify_network_health,
-    "rollback_switch_backup_link": rollback_switch_backup_link,
-    "rollback_block_suspicious_source": rollback_block_suspicious_source,
-}
-
-# 需要审批的高风险动作
 HIGH_RISK_ACTIONS = {
-    "STOP_TRAIN",
-    "BLOCK_SECTION",
-    "EMERGENCY_SHUTDOWN",
+    name
+    for name, registration in ACTION_REGISTRY.items()
+    if registration.metadata.requires_approval
 }
+
+
+def get_registered_action(name: str) -> Optional[RegisteredAction]:
+    """获取动作及其执行、风险和回滚元数据。"""
+    return ACTION_REGISTRY.get(name)
+
+
+def get_action_metadata(name: str) -> Optional[ActionMetadata]:
+    """获取动作元数据，不存在时返回 None。"""
+    registration = get_registered_action(name)
+    return registration.metadata if registration else None
 
 
 def get_action(name: str) -> Optional[callable]:
     """通过名称获取动作函数"""
-    return ALL_MOCK_ACTIONS.get(name)
+    registration = get_registered_action(name)
+    return registration.handler if registration else None
 
 
 def get_rollback_action(name: str) -> Optional[callable]:
     """获取某个动作对应的回滚动作"""
-    rollback_name = ROLLBACK_MAP.get(name)
-    if rollback_name:
-        return ALL_MOCK_ACTIONS.get(rollback_name)
+    metadata = get_action_metadata(name)
+    if metadata and metadata.rollback_action:
+        rollback = get_registered_action(metadata.rollback_action)
+        return rollback.handler if rollback else None
     return None
 
 
 def has_rollback(name: str) -> bool:
     """判断某个动作是否有回滚"""
-    return name in ROLLBACK_MAP
+    metadata = get_action_metadata(name)
+    return bool(metadata and metadata.rollback_action)
 
 
 def requires_approval(name: str) -> bool:
     """判断动作是否需要人工审批"""
-    return name in HIGH_RISK_ACTIONS
+    metadata = get_action_metadata(name)
+    return bool(metadata and metadata.requires_approval)
 
 
 def set_failure_rate(action_name: str, rate: float) -> None:

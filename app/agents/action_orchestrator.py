@@ -19,19 +19,14 @@ from app.models.incident import (
     ApprovalAction,
     ApprovalRequest,
     ApprovalStatus,
-    IncidentState,
     SSEEventType,
-    ActionStatus,
 )
 from app.events.timeout_manager import TimeoutManager, ExecutionResult
 from app.tools.mock_actions import (
-    get_action,
+    get_action_metadata,
     get_rollback_action,
+    get_registered_action,
     has_rollback,
-    requires_approval,
-    ALL_MOCK_ACTIONS,
-    set_failure_rate,
-    get_action as _get_action,
 )
 from app.core.audit_store import audit_store
 
@@ -53,12 +48,9 @@ class ApprovalGate:
         self._pending: Dict[str, ApprovalRequest] = {}
 
     def requires_approval(self, action_name: str) -> bool:
-        """判断动作是否需要审批"""
-        return action_name in {
-            ApprovalAction.STOP_TRAIN.value,
-            ApprovalAction.BLOCK_SECTION.value,
-            ApprovalAction.EMERGENCY_SHUTDOWN.value,
-        }
+        """从动作注册表读取审批要求，避免独立高风险名单漂移。"""
+        metadata = get_action_metadata(action_name)
+        return bool(metadata and metadata.requires_approval)
 
     def create_request(
         self,
@@ -181,9 +173,10 @@ class ActionOrchestrator:
     - 所有动作写入审计（通过 AuditStore）
     """
 
-    def __init__(self):
+    def __init__(self, journal_store=None):
         self.timeout_manager = TimeoutManager()
         self.approval_gate = ApprovalGate()
+        self.journal_store = journal_store
 
     async def execute_plan(
         self,
@@ -203,14 +196,15 @@ class ActionOrchestrator:
             MockActionResult 列表
         """
         results: List[MockActionResult] = []
+        plan.bind_execution_identities(incident.incident_id)
 
-        for i, step in enumerate(plan.steps):
+        for i, instruction in enumerate(plan.actions):
+            action_name = instruction.action.value
+            step = instruction.description or action_name
+            action_metadata = get_action_metadata(action_name)
             logger.info(
-                f"[ActionOrchestrator] 执行步骤 {i + 1}/{len(plan.steps)}: {step}"
+                f"[ActionOrchestrator] 执行步骤 {i + 1}/{len(plan.actions)}: {step}"
             )
-
-            # 解析步骤中的动作名
-            action_name = self._parse_action_name(step)
 
             # 检查是否需要审批
             if self.approval_gate.requires_approval(action_name):
@@ -231,6 +225,10 @@ class ActionOrchestrator:
                         "approval_id": approval_req.request_id,
                         "action": action_name,
                         "step": step,
+                        "plan_revision": plan.plan_revision,
+                        "step_id": instruction.step_id,
+                        "action_id": instruction.action_id,
+                        "idempotency_key": instruction.idempotency_key,
                     },
                     message=f"等待审批: {action_name}",
                 )
@@ -242,9 +240,25 @@ class ActionOrchestrator:
                 self.approval_gate.approve(approval_req.request_id)
 
             # 执行动作
+            if self.journal_store is not None:
+                self.journal_store.start_action_journal(
+                    incident_id=incident.incident_id,
+                    plan_id=plan.plan_id,
+                    plan_revision=plan.plan_revision,
+                    step_id=instruction.step_id,
+                    action_id=instruction.action_id,
+                    idempotency_key=instruction.idempotency_key,
+                    action_name=action_name,
+                    target=self._target_from_arguments(instruction.arguments),
+                    request_metadata=instruction.arguments,
+                )
             result = await self._execute_single_action(
-                action_name, incident, thread_id, step
+                action_name, incident, thread_id, step, instruction.arguments, instruction.action_id
             )
+            if self.journal_store is not None:
+                self.journal_store.finish_action_journal(
+                    instruction.action_id, result, result.metadata
+                )
             results.append(result)
 
             # 审计记录
@@ -258,10 +272,22 @@ class ActionOrchestrator:
                 detail={
                     "step_index": i,
                     "step": step,
+                    "plan_id": plan.plan_id,
+                    "plan_revision": plan.plan_revision,
+                    "step_id": instruction.step_id,
+                    "action_id": instruction.action_id,
+                    "idempotency_key": instruction.idempotency_key,
+                    "arguments": instruction.arguments,
+                    "risk": action_metadata.risk.value if action_metadata else "unknown",
                     "success": result.success,
                     "message": result.message,
                     "duration_ms": result.duration_ms,
                     "retry_count": result.retry_count,
+                    "retry_exhausted": result.retry_exhausted,
+                    "retryable": result.retryable,
+                    "side_effect_possible": result.side_effect_possible,
+                    "side_effect_confirmed": result.side_effect_confirmed,
+                    "outcome": result.outcome,
                 },
                 message=result.message,
             )
@@ -271,9 +297,70 @@ class ActionOrchestrator:
                 logger.warning(
                     f"[ActionOrchestrator] 步骤 {i + 1} 失败: {result.message}"
                 )
-                # 不中断：继续执行剩余步骤（由 Verifier 统一判断）
+                # A later plan step is never safe to execute after the durable
+                # cursor is blocked on this one. Verifier/Replanner decide what
+                # to do with this terminal failure.
+                break
 
         return results
+
+    async def execute_instruction(
+        self,
+        incident: Incident,
+        plan: RunbookPlan,
+        instruction,
+        thread_id: str,
+    ) -> MockActionResult:
+        """Execute one existing plan instruction through the Phase 3 journal path."""
+        action_name = instruction.action.value
+        if self.approval_gate.requires_approval(action_name):
+            approval_req = self.approval_gate.create_request(
+                incident.incident_id,
+                action_name,
+                reason=f"计划步骤: {instruction.description or action_name}",
+                trace_id=incident.trace_id,
+                thread_id=thread_id,
+            )
+            audit_store.record(
+                trace_id=incident.trace_id,
+                incident_id=incident.incident_id,
+                thread_id=thread_id,
+                event_type=SSEEventType.APPROVAL_TIMEOUT,
+                actor="ActionOrchestrator",
+                action=f"awaiting_approval:{action_name}",
+                detail={"approval_id": approval_req.request_id, "action_id": instruction.action_id},
+                message=f"等待审批: {action_name}",
+            )
+            # Keep the existing Mock-mode approval semantics; production callers
+            # still replace this gate through the established approval flow.
+            self.approval_gate.approve(approval_req.request_id)
+        if self.journal_store is not None:
+            self.journal_store.start_action_journal(
+                incident_id=incident.incident_id,
+                plan_id=plan.plan_id,
+                plan_revision=plan.plan_revision,
+                step_id=instruction.step_id,
+                action_id=instruction.action_id,
+                idempotency_key=instruction.idempotency_key,
+                action_name=action_name,
+                target=self._target_from_arguments(instruction.arguments),
+                request_metadata=instruction.arguments,
+            )
+        result = await self._execute_single_action(
+            action_name,
+            incident,
+            thread_id,
+            instruction.description or action_name,
+            instruction.arguments,
+            instruction.action_id,
+        )
+        if self.journal_store is not None:
+            self.journal_store.finish_action_journal(
+                instruction.action_id,
+                result,
+                result.metadata,
+            )
+        return result
 
     async def execute_compensation(
         self,
@@ -297,6 +384,7 @@ class ActionOrchestrator:
             补偿结果列表
         """
         compensation_results: List[MockActionResult] = []
+        plan.bind_execution_identities(incident.incident_id)
 
         audit_store.record(
             trace_id=incident.trace_id,
@@ -309,13 +397,35 @@ class ActionOrchestrator:
             message="开始执行补偿",
         )
 
-        # 1. 执行计划中声明的 rollback_steps
-        for step in plan.rollback_steps:
-            action_name = self._parse_action_name(step)
+        # 1. 执行计划中声明的 rollback_actions
+        for rollback_index, instruction in enumerate(plan.rollback_actions):
+            action_name = instruction.action.value
+            step = instruction.description or action_name
+            if self.journal_store is not None:
+                self.journal_store.start_action_journal(
+                    incident_id=incident.incident_id,
+                    plan_id=plan.plan_id,
+                    plan_revision=plan.plan_revision,
+                    step_id=instruction.step_id,
+                    action_id=instruction.action_id,
+                    idempotency_key=instruction.idempotency_key,
+                    action_name=action_name,
+                    target=self._target_from_arguments(instruction.arguments),
+                    request_metadata=instruction.arguments,
+                )
             result = await self._execute_single_action(
-                action_name, incident, thread_id, f"回滚: {step}"
+                action_name,
+                incident,
+                thread_id,
+                f"回滚: {step}",
+                instruction.arguments,
+                instruction.action_id,
             )
             compensation_results.append(result)
+            if self.journal_store is not None:
+                self.journal_store.finish_action_journal(
+                    instruction.action_id, result, result.metadata
+                )
 
             audit_store.record(
                 trace_id=incident.trace_id,
@@ -324,13 +434,23 @@ class ActionOrchestrator:
                 event_type=SSEEventType.COMPENSATION_STARTED,
                 actor="ActionOrchestrator",
                 action=f"compensate:{action_name}",
-                detail={"success": result.success, "message": result.message},
+                detail={
+                    "success": result.success,
+                    "message": result.message,
+                    "plan_id": plan.plan_id,
+                    "plan_revision": plan.plan_revision,
+                    "step_id": instruction.step_id,
+                    "action_id": instruction.action_id,
+                    "idempotency_key": instruction.idempotency_key,
+                    "rollback_index": rollback_index,
+                },
                 message=f"补偿动作: {action_name} → {'成功' if result.success else '失败'}",
             )
 
         # 2. 对已执行的有副作用的动作自动回滚
         for result in executed_results:
-            if result.success and has_rollback(result.action_name):
+            # 未确认副作用时禁止猜测性回滚，避免重复或反向修改状态。
+            if result.side_effect_confirmed and has_rollback(result.action_name):
                 rollback_fn = get_rollback_action(result.action_name)
                 if rollback_fn:
                     rollback_result = await self._execute_single_action(
@@ -349,6 +469,9 @@ class ActionOrchestrator:
         incident: Incident,
         thread_id: str,
         step_description: str,
+        action_arguments: Optional[Dict[str, Any]] = None,
+        action_id: Optional[str] = None,
+        attempt_offset: int = 0,
     ) -> MockActionResult:
         """
         执行单个 Mock 动作（含超时、重试）。
@@ -362,8 +485,8 @@ class ActionOrchestrator:
         Returns:
             MockActionResult
         """
-        action_fn = get_action(action_name)
-        if action_fn is None:
+        registration = get_registered_action(action_name)
+        if registration is None:
             return MockActionResult(
                 action_name=action_name,
                 success=False,
@@ -371,59 +494,142 @@ class ActionOrchestrator:
                 error_type="unknown_action",
             )
 
-        # 使用 TimeoutManager 包装执行
+        # 执行策略由注册表定义，不能由调用方以统一默认值覆盖。
         exec_result: ExecutionResult = await self.timeout_manager.execute_with_timeout(
-            coro_func=self._wrap_sync_action(action_fn),
+            # 传入 callable 和参数；不要在这里提前创建 coroutine object。
+            coro_func=self._wrap_sync_action,
             operation_name=f"action:{action_name}",
-            timeout_seconds=15.0,  # 工具调用超时
+            timeout_seconds=registration.metadata.timeout_seconds,
+            retry_policy=registration.metadata.retry_policy,
+            uncertain_on_timeout=not registration.metadata.idempotent,
+            args=(registration.handler, action_arguments or {}),
+            attempt_observer=self._attempt_observer(
+                action_id, action_arguments, attempt_offset
+            ),
         )
 
         if exec_result.success and isinstance(exec_result.result, MockActionResult):
             result = exec_result.result
             result.retry_count = exec_result.retry_count
             result.duration_ms = exec_result.total_duration_ms
+            # 兼容旧调用方手工构造的 success=True、未填写 outcome 的结果。
+            result.outcome = (
+                exec_result.outcome.value
+                if exec_result.outcome.value != "unknown"
+                else "success"
+            )
+            result.retry_exhausted = exec_result.retry_exhausted
+            result.retryable = exec_result.retryable
+            result.side_effect_possible = exec_result.side_effect_possible or not registration.metadata.idempotent
+            result.target = result.target or (action_arguments or {}).get("target")
+            result.metadata = {
+                **result.metadata,
+                "action_arguments": action_arguments or {},
+            }
             return result
         elif exec_result.escalated:
+            error_message = exec_result.error_message or exec_result.error or "执行已升级"
             return MockActionResult(
                 action_name=action_name,
                 success=False,
-                message=f"动作超时/重试耗尽，已升级 ESCALATE: {exec_result.error}",
-                error_type="escalated" if exec_result.final_action == "escalate" else exec_result.final_action,
+                message=f"动作执行已升级 ESCALATE: {error_message}",
+                error_type=exec_result.error_type or (
+                    "escalated" if exec_result.final_action == "escalate" else exec_result.final_action
+                ),
                 retry_count=exec_result.retry_count,
                 duration_ms=exec_result.total_duration_ms,
+                outcome=exec_result.outcome.value,
+                retry_exhausted=exec_result.retry_exhausted,
+                retryable=exec_result.retryable,
+                side_effect_possible=exec_result.side_effect_possible or not registration.metadata.idempotent,
+                target=exec_result.target or (action_arguments or {}).get("target"),
+                metadata={"action_arguments": action_arguments or {}},
+            )
+        elif exec_result.final_action == "unknown":
+            error_message = exec_result.error_message or exec_result.error or "执行状态不确定"
+            return MockActionResult(
+                action_name=action_name,
+                success=False,
+                message=f"动作执行状态不确定，需对账后决定: {error_message}",
+                error_type=exec_result.error_type or "unknown",
+                retry_count=exec_result.retry_count,
+                duration_ms=exec_result.total_duration_ms,
+                outcome=exec_result.outcome.value,
+                retry_exhausted=exec_result.retry_exhausted,
+                retryable=exec_result.retryable,
+                side_effect_possible=exec_result.side_effect_possible or not registration.metadata.idempotent,
+                target=exec_result.target or (action_arguments or {}).get("target"),
+                metadata={"action_arguments": action_arguments or {}},
             )
         else:
+            error_message = exec_result.error_message or exec_result.error or "未知执行错误"
             return MockActionResult(
                 action_name=action_name,
                 success=False,
-                message=f"执行异常: {exec_result.error}",
-                error_type="exception",
+                message=f"执行异常: {error_message}",
+                error_type=exec_result.error_type or "exception",
                 retry_count=exec_result.retry_count,
                 duration_ms=exec_result.total_duration_ms,
+                outcome=exec_result.outcome.value,
+                retry_exhausted=exec_result.retry_exhausted,
+                retryable=exec_result.retryable,
+                side_effect_possible=exec_result.side_effect_possible or not registration.metadata.idempotent,
+                target=exec_result.target or (action_arguments or {}).get("target"),
+                metadata={"action_arguments": action_arguments or {}},
             )
 
     @staticmethod
-    async def _wrap_sync_action(fn):
+    async def _wrap_sync_action(fn, kwargs: Dict[str, Any]):
         """将同步 Mock 动作包装为异步"""
         import asyncio
-        return await asyncio.get_running_loop().run_in_executor(None, fn)
+        from functools import partial
+
+        return await asyncio.get_running_loop().run_in_executor(None, partial(fn, **kwargs))
 
     @staticmethod
-    def _parse_action_name(step: str) -> str:
-        """
-        从步骤描述中解析动作名称。
+    def _target_from_arguments(arguments: Dict[str, Any]) -> Optional[str]:
+        for key in ("target", "gateway_id", "source_ip", "source"):
+            if arguments.get(key):
+                return str(arguments[key])
+        return None
 
-        示例:
-        - "使用 switch_backup_link 切换到备用链路" → "switch_backup_link"
-        - "switch_backup_link" → "switch_backup_link"
+    async def resume_action(
+        self,
+        incident: Incident,
+        instruction,
+        thread_id: str,
+        attempt_offset: int,
+    ) -> MockActionResult:
+        """Execute an existing durable action identity during reconciliation recovery.
+
+        The caller owns final journal persistence. This method intentionally does
+        not create a second action journal or generate a new plan identity.
         """
-        step_lower = step.lower()
-        for action_name in ALL_MOCK_ACTIONS:
-            if action_name in step_lower:
-                return action_name
-        # 尝试匹配高风险动作
-        for high_risk in ["STOP_TRAIN", "BLOCK_SECTION", "EMERGENCY_SHUTDOWN"]:
-            if high_risk.lower() in step_lower:
-                return high_risk
-        # 回退: 返回整个 step 作为 action_name
-        return step.strip().split()[0] if step.strip() else "unknown"
+        return await self._execute_single_action(
+            instruction.action.value,
+            incident,
+            thread_id,
+            instruction.description or instruction.action.value,
+            instruction.arguments,
+            instruction.action_id,
+            attempt_offset,
+        )
+
+    def _attempt_observer(
+        self,
+        action_id: Optional[str],
+        arguments: Optional[Dict[str, Any]],
+        attempt_offset: int = 0,
+    ):
+        if self.journal_store is None or action_id is None:
+            return None
+
+        def observe(phase: str, attempt_no: int, result: Optional[ExecutionResult]) -> None:
+            attempt_no += attempt_offset
+            if phase == "STARTED":
+                self.journal_store.start_action_attempt(action_id, attempt_no, arguments or {})
+            elif result is not None:
+                metadata = result.result.metadata if isinstance(result.result, MockActionResult) else {}
+                self.journal_store.finish_action_attempt(action_id, attempt_no, result, metadata)
+
+        return observe

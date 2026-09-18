@@ -27,6 +27,7 @@ from app.models.incident import (
     Incident,
     TriageResult,
     RunbookPlan,
+    ActionInstruction,
     Severity,
     ApprovalAction,
 )
@@ -46,7 +47,7 @@ RUNBOOK_PROMPT = ChatPromptTemplate.from_messages([
             - DoS 不能固定执行某个动作
             - Jamming 不能固定执行某个动作
 
-            可用 Mock 动作列表（只能选择以下动作）:
+            可用 Mock 动作列表（只能选择以下 action 值）:
             1. switch_backup_link — 切换到备用链路
             2. restart_gateway — 重启网关
             3. block_suspicious_source — 封禁可疑来源IP
@@ -54,18 +55,17 @@ RUNBOOK_PROMPT = ChatPromptTemplate.from_messages([
             5. generate_ticket — 生成工单
             6. verify_network_health — 验证网络健康状态
 
-            高风险动作（需审批）:
-            - STOP_TRAIN — 停止列车
-            - BLOCK_SECTION — 封锁区段
-            - EMERGENCY_SHUTDOWN — 紧急关停
-
             输出要求:
-            - steps: 具体可执行的步骤列表（每步必须对应上述动作之一）
+            - actions: 按顺序输出对象列表。每项必须包含 action、arguments、description。
+              action 必须是上述动作名之一；arguments 是传给该动作的 JSON 对象；
+              description 只用于展示和审计，绝不能作为动作识别依据。
             - source_kb: 知识来源（CaseKB / RunbookKB / TopologyKB）
             - affected_assets: 受影响的资产列表
-            - requires_approval: 是否需要审批
-            - approval_actions: 需要审批的动作列表
-            - rollback_steps: 回滚步骤（对于有副作用的动作必须提供）
+            - rollback_actions: 回滚动作对象列表，结构与 actions 相同。
+            - 当前 Mock 工具未实现 STOP_TRAIN、BLOCK_SECTION、EMERGENCY_SHUTDOWN；
+              不得将它们放入 actions 或 rollback_actions。
+            - restart_gateway 和 block_suspicious_source 的审批要求由工具注册表决定；
+              不得自行填写或绕过 requires_approval、approval_actions。
         """).strip(),
     ),
     ("placeholder", "{messages}"),
@@ -155,6 +155,7 @@ class RunbookAgent:
             # 设置知识来源
             if not plan.source_kb:
                 plan.source_kb = source_kb or "TopologyKB"
+            self._apply_registry_metadata(plan)
 
             logger.info(
                 f"[RunbookAgent] 计划生成完成: {len(plan.steps)} 步骤, "
@@ -165,6 +166,19 @@ class RunbookAgent:
         except Exception as e:
             logger.error(f"[RunbookAgent] LLM 调用失败: {e}", exc_info=True)
             return self._fallback_plan(incident, triage_result)
+
+    @staticmethod
+    def _apply_registry_metadata(plan: RunbookPlan) -> None:
+        """以工具注册表为准生成审批展示字段，忽略 LLM 的自报结果。"""
+        from app.tools.mock_actions import get_action_metadata
+
+        approval_actions = []
+        for instruction in plan.actions:
+            metadata = get_action_metadata(instruction.action.value)
+            if metadata and metadata.requires_approval:
+                approval_actions.append(ApprovalAction(instruction.action.value))
+        plan.requires_approval = bool(approval_actions)
+        plan.approval_actions = approval_actions
 
     # ================================================================
     # 知识库检索（严格按优先级 — Metric-driven 版本）
@@ -324,48 +338,56 @@ class RunbookAgent:
         is_signal_interference = "signal interference" in diagnosed_type or "interference" in root_cause
 
         if is_dos or is_jamming:
-            steps = [
-                "使用 block_suspicious_source 封禁可疑来源IP",
-                "使用 switch_backup_link 切换到备用链路",
-                "使用 notify_dispatcher 通知调度员",
-                "使用 generate_ticket 生成工单",
-                "使用 verify_network_health 验证网络健康",
+            actions = [
+                ActionInstruction(action="block_suspicious_source", description="封禁可疑来源 IP"),
+                ActionInstruction(action="switch_backup_link", description="切换到备用链路"),
+                ActionInstruction(action="notify_dispatcher", description="通知调度员"),
+                ActionInstruction(action="generate_ticket", description="生成工单"),
+                ActionInstruction(action="verify_network_health", description="验证网络健康"),
             ]
-            rollback = [
-                "rollback_block_suspicious_source 解除IP封禁",
-                "rollback_switch_backup_link 恢复原始链路",
+            rollback_actions = [
+                ActionInstruction(
+                    action="rollback_block_suspicious_source", description="解除 IP 封禁"
+                ),
+                ActionInstruction(
+                    action="rollback_switch_backup_link", description="恢复原始链路"
+                ),
             ]
         elif is_replay or is_spoofing:
-            steps = [
-                "使用 block_suspicious_source 封禁可疑来源IP",
-                "使用 restart_gateway 重启网关",
-                "使用 notify_dispatcher 通知调度员",
-                "使用 verify_network_health 验证网络健康",
+            actions = [
+                ActionInstruction(action="block_suspicious_source", description="封禁可疑来源 IP"),
+                ActionInstruction(action="restart_gateway", description="重启网关"),
+                ActionInstruction(action="notify_dispatcher", description="通知调度员"),
+                ActionInstruction(action="verify_network_health", description="验证网络健康"),
             ]
-            rollback = [
-                "rollback_block_suspicious_source 解除IP封禁",
+            rollback_actions = [
+                ActionInstruction(
+                    action="rollback_block_suspicious_source", description="解除 IP 封禁"
+                ),
             ]
         elif is_signal_interference:
-            steps = [
-                "使用 switch_backup_link 切换到备用链路",
-                "使用 notify_dispatcher 通知调度员",
-                "使用 generate_ticket 生成工单",
-                "使用 verify_network_health 验证网络健康",
+            actions = [
+                ActionInstruction(action="switch_backup_link", description="切换到备用链路"),
+                ActionInstruction(action="notify_dispatcher", description="通知调度员"),
+                ActionInstruction(action="generate_ticket", description="生成工单"),
+                ActionInstruction(action="verify_network_health", description="验证网络健康"),
             ]
-            rollback = [
-                "rollback_switch_backup_link 恢复原始链路",
+            rollback_actions = [
+                ActionInstruction(
+                    action="rollback_switch_backup_link", description="恢复原始链路"
+                ),
             ]
         else:
             # UNKNOWN 或其他 — 保守处置
-            steps = [
-                "使用 notify_dispatcher 通知调度员",
-                "使用 generate_ticket 生成工单",
-                "使用 verify_network_health 验证网络健康",
+            actions = [
+                ActionInstruction(action="notify_dispatcher", description="通知调度员"),
+                ActionInstruction(action="generate_ticket", description="生成工单"),
+                ActionInstruction(action="verify_network_health", description="验证网络健康"),
             ]
-            rollback = []
+            rollback_actions = []
 
-        return RunbookPlan(
-            steps=steps,
+        plan = RunbookPlan(
+            actions=actions,
             source_kb="Fallback",
             affected_assets=(
                 triage.impact_scope
@@ -374,5 +396,7 @@ class RunbookAgent:
             ),
             requires_approval=False,
             approval_actions=[],
-            rollback_steps=rollback,
+            rollback_actions=rollback_actions,
         )
+        self._apply_registry_metadata(plan)
+        return plan

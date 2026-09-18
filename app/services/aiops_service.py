@@ -24,6 +24,7 @@ from app.agent.aiops import PlanExecuteState, executor, planner, replanner
 from app.core.audit_store import audit_store
 from app.core.incident_router import IncidentRouter
 from app.core.incident_store import incident_store
+from app.core.recovery import recover_pending_workflows
 from app.models.incident import (
     MAX_RECOVERY_ATTEMPTS,
     FailureContext,
@@ -187,6 +188,10 @@ class AIOpsService:
                 "message": f"Incident processing failed: {str(e)}",
             }
 
+    async def recover_pending_workflows(self):
+        """Explicit Phase 5 recovery entry point; callers decide when to invoke it."""
+        return await recover_pending_workflows(incident_store)
+
     async def process_stsrs(
         self,
         stsrs_data: Dict[str, Any],
@@ -340,13 +345,23 @@ class AIOpsService:
         rollback_results = []
         try:
             from app.agents.action_orchestrator import ActionOrchestrator
-            from app.models.incident import AttackType, Incident, IncidentMetadata, Severity
+            from app.models.incident import (
+                ActionInstruction,
+                AttackType,
+                Incident,
+                IncidentMetadata,
+                Severity,
+            )
 
             orchestrator = ActionOrchestrator()
-            rollback_steps = [
-                "使用 rollback_block_suspicious_source 解除IP封禁",
-                "使用 rollback_switch_backup_link 恢复原始链路",
-                "使用 verify_network_health 验证网络健康",
+            rollback_actions = [
+                ActionInstruction(
+                    action="rollback_block_suspicious_source", description="解除 IP 封禁"
+                ),
+                ActionInstruction(
+                    action="rollback_switch_backup_link", description="恢复原始链路"
+                ),
+                ActionInstruction(action="verify_network_health", description="验证网络健康"),
             ]
             temp_incident = Incident(
                 incident_id=incident_id,
@@ -356,17 +371,18 @@ class AIOpsService:
                 description=f"Safety Control Rollback for {incident_id}",
             )
 
-            for index, step in enumerate(rollback_steps, start=1):
-                action_name = orchestrator._parse_action_name(step)
+            for index, instruction in enumerate(rollback_actions, start=1):
+                action_name = instruction.action.value
+                step = instruction.description or action_name
                 result = await orchestrator._execute_single_action(
-                    action_name, temp_incident, thread_id, step
+                    action_name, temp_incident, thread_id, step, instruction.arguments
                 )
                 rollback_results.append(result)
                 yield {
                     "type": "safety_rollback_action",
                     "stage": "safety_rollback",
                     "message": (
-                        f"Rollback {index}/{len(rollback_steps)}: {action_name} -> "
+                        f"Rollback {index}/{len(rollback_actions)}: {action_name} -> "
                         f"{'success' if result.success else 'failed'}"
                     ),
                     "incident_id": incident_id,

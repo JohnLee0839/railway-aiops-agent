@@ -55,19 +55,45 @@ services:
       - "19530:19530"
       - "9091:9091"
     depends_on:
-      - "etcd"
-      - "minio"
-  # 这是新增的 Attu 服务哦！
+      - etcd
+      - minio
+
   attu:
     container_name: milvus-attu
     image: zilliz/attu:v2.5
     ports:
-      - "8000:3000" # 把本地的 8000 端口映射到容器的 3000 端口 (Attu 默认端口)
+      - "8000:3000"
     environment:
-      # MILVUS_URL 指向 Docker 网络里的 Milvus standalone 服务
       MILVUS_URL: standalone:19530
     depends_on:
-      - standalone # 确保 Milvus 启动后再启动 Attu
+      - standalone
+
+  # ========== 🟢 新增 PostgreSQL 服务 ==========
+  postgres:
+    container_name: rag-postgres
+    image: postgres:16-alpine          # alpine 版本更小
+    restart: always
+    environment:
+      POSTGRES_USER: postgres          # 用户名
+      POSTGRES_PASSWORD: johnlee     
+      POSTGRES_DB: rag_app             # 默认数据库名
+      PGDATA: /var/lib/postgresql/data/pgdata  # 指定数据存放子目录
+    ports:
+      - "5432:5432"
+    volumes:
+      # ✅ 使用相对路径，和Milvus 风格一致
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # 不需要 depends_on，PostgreSQL 不依赖其他服务
+    networks:
+      - default  # 使用默认网络，可以和 Milvus 互通
+
+# 网络配置保持不变（但 Docker Compose 会自动创建）
+# 如果你需要保持网络名为 milvus，可以加上：
 networks:
   default:
     name: milvus

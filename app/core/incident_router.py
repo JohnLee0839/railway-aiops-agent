@@ -48,7 +48,7 @@ class IncidentRouter:
         self.severity_engine = SeverityEngine()
         self.triage_agent = TriageAgent()
         self.runbook_agent = RunbookAgent()
-        self.action_orchestrator = ActionOrchestrator()
+        self.action_orchestrator = ActionOrchestrator(journal_store=incident_store)
         self.verifier = Verifier()
         self.replanner = Replanner()
 
@@ -267,7 +267,9 @@ class IncidentRouter:
                         f"TRIAGED → PLANNED", thread_id)
 
         plan = await self.runbook_agent.generate_plan(incident, triage_result)
+        plan.bind_execution_identities(incident.incident_id)
         record.plan = plan.steps
+        record.runbook_plan = plan
         incident_store.update(record)
 
         audit_store.record(

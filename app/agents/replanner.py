@@ -88,6 +88,7 @@ class Replanner:
                     reason=f"Replanner 决策: {action.value}",
                     triggered_by="Replanner",
                 )
+                incident_store.update(record)
             except ValueError as e:
                 logger.error(f"[Replanner] 状态迁移失败: {e}")
 

@@ -281,7 +281,10 @@ class StubTriageAgent:
 class StubRunbookAgent:
     async def generate_plan(self, _incident, _triage_result):
         return RunbookPlan(
-            steps=["使用 verify_network_health 验证网络健康"],
+            actions=[{
+                "action": "verify_network_health",
+                "description": "验证网络健康",
+            }],
             source_kb="TestKB",
             confidence=0.95,
             reasoning="test",
